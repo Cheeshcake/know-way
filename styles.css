@@ -433,6 +433,11 @@ h2 {
   left: 100%;
 }
 
+.btn a {
+  color: var(--white) !important;
+  text-decoration: none !important;
+}
+
 /* Divider */
 .divider {
   display: flex;
