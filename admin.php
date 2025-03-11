@@ -113,6 +113,10 @@ $isLoading = false;
                         <h3>Course Completions</h3>
                         <p class="stat-number">548</p>
                     </div>
+                    <div class="stat-card">
+                        <h3>Average Rating</h3>
+                        <p class="stat-number">4.8</p>
+                    </div>
                 </div>
                 
                 <div class="courses-container">
