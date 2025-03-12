@@ -297,7 +297,7 @@ h2 {
 }
 
 .input-group input:focus + label,
-.input-group input:valid + label {
+.input-group input:not(:placeholder-shown) + label {
   top: -12px;
   left: 12px;
   font-size: 0.8rem;
