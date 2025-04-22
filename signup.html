@@ -58,8 +58,47 @@
             <div class="terms">
               <input type="checkbox" id="terms" />
               <label for="terms"
-                >I agree to the <a href="#">Terms & Conditions</a></label
+                >I agree to the
+                <a href="#terms-modal">Terms & Conditions</a></label
               >
+            </div>
+            <div class="modal-overlay" id="terms-modal">
+              <div class="modal-container">
+                <div class="modal-header">
+                  <h3>Terms & Conditions</h3>
+                  <button class="modal-close">&times;</button>
+                </div>
+                <div class="modal-content">
+                  <h4>1. Acceptance of Terms</h4>
+                  <p>
+                    By using KnowWay, you agree to these terms and conditions.
+                    If you do not agree, please do not use our services.
+                  </p>
+
+                  <h4>2. User Responsibilities</h4>
+                  <p>
+                    You are responsible for maintaining the confidentiality of
+                    your account and password and for restricting access to your
+                    device.
+                  </p>
+
+                  <h4>3. Content</h4>
+                  <p>
+                    All content provided on KnowWay is for informational
+                    purposes only. We make no representations as to accuracy or
+                    completeness.
+                  </p>
+
+                  <h4>4. Modifications</h4>
+                  <p>
+                    We reserve the right to modify these terms at any time. Your
+                    continued use constitutes acceptance of those changes.
+                  </p>
+                </div>
+                <div class="modal-footer">
+                  <button class="btn modal-agree">I Agree</button>
+                </div>
+              </div>
             </div>
 
             <button type="submit" class="btn">Create Account</button>
@@ -81,5 +120,6 @@
         </div>
       </div>
     </div>
+    <script src="script.js"></script>
   </body>
 </html>
