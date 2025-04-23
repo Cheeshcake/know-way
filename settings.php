@@ -13,10 +13,10 @@ $_SESSION['is_admin'] = true;
 // User data retrieval (replace with your database code)
 $user = [
     'id' => 1,
-    'name' => 'Sophie Martin',
-    'email' => 'sophie.martin@example.com',
+    'name' => 'Nourane abdella',
+    'email' => 'Nourane.abdella@example.com',
     'avatar' => null,
-    'phone' => '+33 6 12 34 56 78',
+    'phone' => '+216 24 682 456',
     'bio' => 'Student passionate about online learning and personal development.',
     'notifications' => [
         'email_course_updates' => true,
@@ -27,7 +27,7 @@ $user = [
     ],
     'security' => [
         'two_factor_auth' => false,
-        'last_password_change' => '03/15/2023',
+        'last_password_change' => '22/04/2025',
         'active_sessions' => 2
     ],
     'courses' => [
@@ -35,19 +35,19 @@ $user = [
             'id' => 1,
             'title' => 'Introduction to Web Development',
             'progress' => 75,
-            'last_activity' => '04/18/2023'
+            'last_activity' => '18/04/2025'
         ],
         [
             'id' => 2,
             'title' => 'Advanced Digital Marketing',
             'progress' => 45,
-            'last_activity' => '04/15/2023'
+            'last_activity' => '10/03/2025'
         ],
         [
             'id' => 3,
             'title' => 'Photography for Beginners',
             'progress' => 90,
-            'last_activity' => '04/10/2023'
+            'last_activity' => '04/10/2025'
         ]
     ]
 ];
@@ -70,6 +70,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
 $activeTab = $_GET['tab'] ?? 'general';
 $showSuccess = isset($_GET['success']) && $_GET['success'] == 1;
+
+// Get initials for avatar placeholder
+$initials = '';
+$name_parts = explode(' ', $user['name']);
+foreach ($name_parts as $part) {
+    $initials .= substr($part, 0, 1);
+}
 ?>
 
 <!DOCTYPE html>
@@ -94,9 +101,9 @@ $showSuccess = isset($_GET['success']) && $_GET['success'] == 1;
             <nav class="sidebar-nav">
                 <ul>
                     <li><a href="dashboard.php"><i class="fas fa-th-large"></i>Dashboard</a></li>
-                    <li><a href="courses.php"><i class="fas fa-book"></i>My Courses</a></li>
+                    <li><a href="my-courses.php"><i class="fas fa-book"></i>My Courses</a></li>
                     <li><a href="messages.php"><i class="fas fa-envelope"></i>Messages</a></li>
-                    <li><a href="calendar.php"><i class="fas fa-calendar"></i>Calendar</a></li>
+                    <li><a href="quiz.php"><i class="fas fa-question-circle"></i>Quiz</a></li>
                     <li class="active"><a href="settings.php"><i class="fas fa-cog"></i>Settings</a></li>
                     <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin']): ?>
                     <li><a href="admin.php"><i class="fas fa-user-shield"></i>Admin Panel</a></li>
@@ -127,14 +134,7 @@ $showSuccess = isset($_GET['success']) && $_GET['success'] == 1;
                             <?php if ($user['avatar']): ?>
                                 <img src="<?php echo htmlspecialchars($user['avatar']); ?>" alt="Avatar">
                             <?php else: ?>
-                                <?php 
-                                $initials = '';
-                                $name_parts = explode(' ', $user['name']);
-                                foreach ($name_parts as $part) {
-                                    $initials .= substr($part, 0, 1);
-                                }
-                                echo htmlspecialchars($initials);
-                                ?>
+                                <?php echo htmlspecialchars($initials); ?>
                             <?php endif; ?>
                         </div>
                         <span class="user-name"><?php echo htmlspecialchars($user['name']); ?></span>
@@ -157,9 +157,9 @@ $showSuccess = isset($_GET['success']) && $_GET['success'] == 1;
                             <div class="user-avatar large">
                                 <?php if ($user['avatar']): ?>
                                     <img src="<?php echo htmlspecialchars($user['avatar']); ?>" alt="Avatar">
-                                <?php else: ?>
-                                    <?php echo htmlspecialchars($initials); ?>
-                                <?php endif; ?>
+                            <?php else: ?>
+                                <?php echo htmlspecialchars($initials); ?>
+                            <?php endif; ?>
                             </div>
                             <h3 class="user-name"><?php echo htmlspecialchars($user['name']); ?></h3>
                             <p class="user-email"><?php echo htmlspecialchars($user['email']); ?></p>
@@ -178,7 +178,7 @@ $showSuccess = isset($_GET['success']) && $_GET['success'] == 1;
                                 <i class="fas fa-bell"></i>
                                 Notifications
                             </a>
-                            <a href="?tab=courses" class="settings-nav-item <?php echo $activeTab === 'courses' ? 'active' : ''; ?>">
+                            <a href="my-courses.php" class="settings-nav-item">
                                 <i class="fas fa-book"></i>
                                 My Courses
                             </a>
@@ -314,6 +314,7 @@ $showSuccess = isset($_GET['success']) && $_GET['success'] == 1;
                                 <p class="settings-panel-description">Customize how you want to be notified about activities.</p>
                                 
                                 <form method="POST" action="settings.php" class="settings-form">
+                                    <input type="hidden" name  class="settings-form">
                                     <input type="hidden" name="action" value="update_notifications">
                                     
                                     <div class="notification-section">
@@ -368,33 +369,6 @@ $showSuccess = isset($_GET['success']) && $_GET['success'] == 1;
                                         <button type="submit" class="btn btn-primary">Save Preferences</button>
                                     </div>
                                 </form>
-                            </div>
-                        <?php elseif ($activeTab === 'courses'): ?>
-                            <div class="settings-panel">
-                                <h3 class="settings-panel-title">My Courses</h3>
-                                <p class="settings-panel-description">View and manage your current courses.</p>
-                                
-                                <div class="courses-list">
-                                    <?php foreach ($user['courses'] as $course): ?>
-                                        <div class="course-card">
-                                            <div class="course-info">
-                                                <h4 class="course-title"><?php echo htmlspecialchars($course['title']); ?></h4>
-                                                <p class="course-meta">Last activity: <?php echo htmlspecialchars($course['last_activity']); ?></p>
-                                                
-                                                <div class="progress-container">
-                                                    <div class="progress-bar">
-                                                        <div class="progress-fill" style="width: <?php echo $course['progress']; ?>%"></div>
-                                                    </div>
-                                                    <span class="progress-text"><?php echo $course['progress']; ?>% completed</span>
-                                                </div>
-                                            </div>
-                                            
-                                            <div class="course-actions">
-                                                <a href="course.php?id=<?php echo $course['id']; ?>" class="btn btn-outline">Continue</a>
-                                            </div>
-                                        </div>
-                                    <?php endforeach; ?>
-                                </div>
                             </div>
                         <?php endif; ?>
                     </div>
@@ -455,6 +429,29 @@ $showSuccess = isset($_GET['success']) && $_GET['success'] == 1;
                         alert('Passwords do not match.');
                     }
                 });
+            }
+            
+            // Ensure form-actions are visible on scroll
+            const formActions = document.querySelectorAll('.form-actions');
+            if (formActions.length > 0) {
+                window.addEventListener('resize', function() {
+                    if (window.innerWidth <= 768) {
+                        formActions.forEach(function(formAction) {
+                            formAction.classList.add('sticky-bottom');
+                        });
+                    } else {
+                        formActions.forEach(function(formAction) {
+                            formAction.classList.remove('sticky-bottom');
+                        });
+                    }
+                });
+                
+                // Initial check
+                if (window.innerWidth <= 768) {
+                    formActions.forEach(function(formAction) {
+                        formAction.classList.add('sticky-bottom');
+                    });
+                }
             }
         });
     </script>

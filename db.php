@@ -1,18 +1,18 @@
 <?php
-// db.php - Database connection file
+// Database connection
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "know-way";
 
-// This is a placeholder file for database connection
-// In a real application, this would contain actual database connection code
+// Create connection
+$conn = new mysqli($servername, $username, $password, $dbname);
 
-// For demonstration purposes, we'll just define a dummy function
-function getDatabaseConnection() {
-    // In a real application, this would be:
-    // $conn = new mysqli($servername, $username, $password, $dbname);
-    // or
-    // $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
-    
-    return null;
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
 }
 
-// You can add more database helper functions here
+// Set charset to ensure proper encoding
+$conn->set_charset("utf8mb4");
 ?>

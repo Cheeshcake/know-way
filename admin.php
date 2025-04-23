@@ -70,10 +70,11 @@ $showSuccess = isset($_GET['success']) && $_GET['success'] == 1;
             <nav class="sidebar-nav">
                 <ul>
                     <li class="active"><a href="admin.php"><i class="fas fa-th-large"></i>Dashboard</a></li>
-                    <li><a href="courses.php"><i class="fas fa-book"></i>Courses</a></li>
+                    <li><a href="admin-courses.php"><i class="fas fa-book"></i>Courses</a></li>
                     <li><a href="users.php"><i class="fas fa-users"></i>Users</a></li>
-                    <li><a href="statistics.php"><i class="fas fa-chart-bar"></i>Statistics</a></li>
+                    <li><a href="admin-statistics.php"><i class="fas fa-chart-bar"></i>Statistics</a></li>
                     <li><a href="settings.php"><i class="fas fa-cog"></i>Settings</a></li>
+                    <li><a href="dashboard.php"><i class="fas fa-graduation-cap"></i>Student Dashboard</a></li>
                 </ul>
             </nav>
             
@@ -103,10 +104,13 @@ $showSuccess = isset($_GET['success']) && $_GET['success'] == 1;
             </header>
             
             <div class="content-body">
-                <?php if ($showSuccess): ?>
+                <?php 
+                $successMessage = isset($_GET['success']) ? $_GET['success'] : 'Your changes have been successfully saved.';
+                if (isset($_GET['success'])): 
+                ?>
                 <div class="alert alert-success">
                     <i class="fas fa-check-circle"></i>
-                    Your changes have been successfully saved.
+                    <?php echo htmlspecialchars($successMessage); ?>
                     <button class="close-alert"><i class="fas fa-times"></i></button>
                 </div>
                 <?php endif; ?>
@@ -178,7 +182,7 @@ $showSuccess = isset($_GET['success']) && $_GET['success'] == 1;
                                 <p class="course-desc">Learn the basics of JavaScript, the programming language of the web...</p>
                                 <div class="course-actions">
                                     <button class="edit-btn"><i class="fas fa-edit"></i> Edit</button>
-                                    <button class="delete-btn"><i class="fas fa-trash"></i> Delete</button>
+                                    <button class="delete-btn" onclick="confirmDelete(1)"><i class="fas fa-trash"></i> Delete</button>
                                 </div>
                             </div>
                         </div>
@@ -192,7 +196,7 @@ $showSuccess = isset($_GET['success']) && $_GET['success'] == 1;
                                 <p class="course-desc">Master advanced techniques for user interface design...</p>
                                 <div class="course-actions">
                                     <button class="edit-btn"><i class="fas fa-edit"></i> Edit</button>
-                                    <button class="delete-btn"><i class="fas fa-trash"></i> Delete</button>
+                                    <button class="delete-btn" onclick="confirmDelete(2)"><i class="fas fa-trash"></i> Delete</button>
                                 </div>
                             </div>
                         </div>
@@ -206,13 +210,34 @@ $showSuccess = isset($_GET['success']) && $_GET['success'] == 1;
                                 <p class="course-desc">Discover Python, a powerful and easy-to-learn programming language...</p>
                                 <div class="course-actions">
                                     <button class="edit-btn"><i class="fas fa-edit"></i> Edit</button>
-                                    <button class="delete-btn"><i class="fas fa-trash"></i> Delete</button>
+                                    <button class="delete-btn" onclick="confirmDelete(3)"><i class="fas fa-trash"></i> Delete</button>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <?php endif; ?>
                 </div>
+                
+                <!-- Navigation links to other pages -->
+                <div class="admin-navigation-links">
+                    <h3 class="section-title">Quick Links</h3>
+                    <div class="quick-links-grid">
+                        <a href="my-courses.php" class="quick-link-card">
+                            <i class="fas fa-graduation-cap"></i>
+                            <span>Student Dashboard</span>
+                        </a>
+                        <a href="settings.php" class="quick-link-card">
+                            <i class="fas fa-cog"></i>
+                            <span>User Settings</span>
+                        </a>
+                        <a href="admin-courses.php" class="quick-link-card">
+                            <i class="fas fa-book"></i>
+                            <span>Manage Courses</span>
+                        </a>
+                        <a href="users.php" class="quick-link-card">
+                            <i class="fas fa-users"></i>
+                            <span>Manage Users</span>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -227,8 +252,7 @@ $showSuccess = isset($_GET['success']) && $_GET['success'] == 1;
                 <button class="modal-close" id="closeModal">&times;</button>
             </div>
             <div class="modal-body">
-                <form method="POST" action="admin.php" enctype="multipart/form-data" class="settings-form">
-                    <input type="hidden" name="action" value="add_course">
+                <form method="POST" action="add-course.php" enctype="multipart/form-data" class="settings-form">
                     
                     <div class="form-group">
                         <label for="title">Course Title</label>
@@ -238,6 +262,18 @@ $showSuccess = isset($_GET['success']) && $_GET['success'] == 1;
                     <div class="form-group">
                         <label for="description">Course Description</label>
                         <textarea id="description" name="description" placeholder="Enter course description" required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="category">Course Category</label>
+                        <select id="category" name="category" required>
+                            <option value="">Select a category</option>
+                            <option value="HTML">HTML</option>
+                            <option value="CSS">CSS</option>
+                            <option value="PHP">PHP</option>
+                            <option value="JavaScript">JavaScript</option>
+                            <option value="Design">Design</option>
+                        </select>
                     </div>
                     
                     <div class="form-group">
@@ -256,6 +292,20 @@ $showSuccess = isset($_GET['success']) && $_GET['success'] == 1;
             </div>
         </div>
     </div>
+    
+    <!-- Delete Course Form (Hidden) -->
+    <form id="deleteCourseForm" method="POST" action="delete-course.php" style="display: none;">
+        <input type="hidden" name="id" id="deleteId">
+    </form>
+    
+    <script>
+        function confirmDelete(courseId) {
+            if (confirm('Are you sure you want to delete this course? This action cannot be undone.')) {
+                document.getElementById('deleteId').value = courseId;
+                document.getElementById('deleteCourseForm').submit();
+            }
+        }
+    </script>
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {

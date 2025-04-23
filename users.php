@@ -1,4 +1,18 @@
 <?php
+// users.php - Admin Users Management Page
+
+// Start session if not already started
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Check if user is admin
+if (!isset($_SESSION['is_admin']) || !$_SESSION['is_admin']) {
+    // Redirect non-admin users
+    header('Location: dashboard.php');
+    exit;
+}
+
 // Connexion à la base de données (si nécessaire)
 include 'db.php';
 
@@ -89,22 +103,25 @@ if ($search || $filter !== 'all') {
 
 // Pagination
 $totalPages = ceil(count($filteredUsers) / $limit);
+
+// Get initials for avatar placeholder
+$admin_initials = 'A';
 ?>
 
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KnowWay Admin - Gestion des Utilisateurs</title>
-    <link rel="stylesheet" href="users-dashboard.css">
+    <title>KnowWay Admin - User Management</title>
+    <link rel="stylesheet" href="admin-styles.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
-   
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <div class="admin-container">
+    <div class="admin-container" id="adminContainer">
         <!-- Sidebar Navigation -->
-        <aside class="sidebar">
+        <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <h1 class="logo">KnowWay</h1>
                 <p class="admin-label">Admin Panel</p>
@@ -112,16 +129,17 @@ $totalPages = ceil(count($filteredUsers) / $limit);
             
             <nav class="sidebar-nav">
                 <ul>
-                    <li><a href="admin.php"><span class="nav-icon dashboard-icon"></span>Dashboard</a></li>
-                    <li><a href="courses.php"><span class="nav-icon courses-icon"></span>Courses</a></li>
-                    <li class="active"><a href="users.php"><span class="nav-icon users-icon"></span>Users</a></li>
-                    <li><a href="statistics.php"><span class="nav-icon stats-icon"></span>Statistics</a></li>
-                    <li><a href="settings.php"><span class="nav-icon settings-icon"></span>Settings</a></li>
+                    <li><a href="admin.php"><i class="fas fa-th-large"></i>Dashboard</a></li>
+                    <li><a href="admin-courses.php"><i class="fas fa-book"></i>Courses</a></li>
+                    <li class="active"><a href="users.php"><i class="fas fa-users"></i>Users</a></li>
+                    <li><a href="admin-statistics.php"><i class="fas fa-chart-bar"></i>Statistics</a></li>
+                    <li><a href="settings.php"><i class="fas fa-cog"></i>Settings</a></li>
+                    <li><a href="dashboard.php"><i class="fas fa-graduation-cap"></i>Student Dashboard</a></li>
                 </ul>
             </nav>
             
             <div class="sidebar-footer">
-                <a href="logout.php" class="logout-btn">Sign Out</a>
+                <a href="logout.php" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
             </div>
         </aside>
         
@@ -134,55 +152,63 @@ $totalPages = ceil(count($filteredUsers) / $limit);
                         <span></span>
                         <span></span>
                     </button>
-                    <h2>Gestion des Utilisateurs</h2>
+                    <h2>User Management</h2>
                 </div>
                 
                 <div class="header-right">
-                    <div class="admin-profile">
-                        <span class="admin-avatar">A</span>
-                        <span class="admin-name">Admin</span>
+                    <div class="user-profile">
+                        <div class="user-avatar"><?php echo htmlspecialchars($admin_initials); ?></div>
+                        <span class="user-name">Admin</span>
                     </div>
                 </div>
             </header>
             
             <div class="content-body">
+                <?php if (isset($_GET['success'])): ?>
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle"></i>
+                    <?php echo htmlspecialchars($_GET['success']); ?>
+                    <button class="close-alert"><i class="fas fa-times"></i></button>
+                </div>
+                <?php endif; ?>
+                
                 <div class="toolbar">
                     <div class="search-filter">
                         <form method="GET" class="search-form">
                             <div class="search-input-wrapper">
-                                <input type="text" name="search" placeholder="Rechercher des utilisateurs..." value="<?php echo htmlspecialchars($search); ?>">
-                                <button type="submit" class="search-btn"></button>
+                                <input type="text" name="search" placeholder="Search users..." value="<?php echo htmlspecialchars($search); ?>">
+                                <button type="submit" class="search-btn"><i class="fas fa-search"></i></button>
                             </div>
                             
                             <div class="filter-wrapper">
                                 <select name="filter" class="filter-select">
-                                    <option value="all" <?php echo $filter === 'all' ? 'selected' : ''; ?>>Tous les statuts</option>
-                                    <option value="active" <?php echo $filter === 'active' ? 'selected' : ''; ?>>Actifs</option>
-                                    <option value="inactive" <?php echo $filter === 'inactive' ? 'selected' : ''; ?>>Inactifs</option>
-                                    <option value="pending" <?php echo $filter === 'pending' ? 'selected' : ''; ?>>En attente</option>
+                                    <option value="all" <?php echo $filter === 'all' ? 'selected' : ''; ?>>All Statuses</option>
+                                    <option value="active" <?php echo $filter === 'active' ? 'selected' : ''; ?>>Active</option>
+                                    <option value="inactive" <?php echo $filter === 'inactive' ? 'selected' : ''; ?>>Inactive</option>
+                                    <option value="pending" <?php echo $filter === 'pending' ? 'selected' : ''; ?>>Pending</option>
                                 </select>
                             </div>
                         </form>
                     </div>
                     
-                    <button class="add-user-btn" id="addUserBtn">Ajouter un utilisateur</button>
+                    <button class="add-user-btn" id="addUserBtn"><i class="fas fa-plus"></i> Add User</button>
                 </div>
                 
                 <div class="dashboard-stats">
                     <div class="stat-card">
-                        <h3>Total Utilisateurs</h3>
+                        <h3>Total Users</h3>
                         <p class="stat-number"><?php echo $totalUsers; ?></p>
                     </div>
                     <div class="stat-card">
-                        <h3>Utilisateurs Actifs</h3>
+                        <h3>Active Users</h3>
                         <p class="stat-number"><?php echo $activeUsers; ?></p>
                     </div>
                     <div class="stat-card">
-                        <h3>Utilisateurs Inactifs</h3>
+                        <h3>Inactive Users</h3>
                         <p class="stat-number"><?php echo $inactiveUsers; ?></p>
                     </div>
                     <div class="stat-card">
-                        <h3>En Attente</h3>
+                        <h3>Pending</h3>
                         <p class="stat-number"><?php echo $pendingUsers; ?></p>
                     </div>
                 </div>
@@ -191,11 +217,11 @@ $totalPages = ceil(count($filteredUsers) / $limit);
                     <table class="users-table">
                         <thead>
                             <tr>
-                                <th>Nom</th>
+                                <th>Name</th>
                                 <th>Email</th>
-                                <th>Statut</th>
-                                <th>Cours inscrits</th>
-                                <th>Dernière activité</th>
+                                <th>Status</th>
+                                <th>Enrolled Courses</th>
+                                <th>Last Activity</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -222,21 +248,24 @@ $totalPages = ceil(count($filteredUsers) / $limit);
                                         <td>
                                             <span class="status-badge status-<?php echo $user['status']; ?>">
                                                 <?php 
-                                                    echo $user['status'] === 'active' ? 'Actif' : 
-                                                        ($user['status'] === 'inactive' ? 'Inactif' : 'En attente'); 
+                                                    echo ucfirst($user['status']);
                                                 ?>
                                             </span>
                                         </td>
                                         <td><?php echo $user['enrolledCourses']; ?></td>
                                         <td><?php echo $user['lastActive']; ?></td>
                                         <td>
-                                            <a href="user-detail.php?id=<?php echo $user['id']; ?>" class="action-btn view-btn">Voir</a>
+                                            <div class="action-buttons">
+                                                <a href="user-detail.php?id=<?php echo $user['id']; ?>" class="action-btn view-btn"><i class="fas fa-eye"></i></a>
+                                                <a href="edit-user.php?id=<?php echo $user['id']; ?>" class="action-btn edit-btn"><i class="fas fa-edit"></i></a>
+                                                <button class="action-btn delete-btn" onclick="confirmDeleteUser(<?php echo $user['id']; ?>)"><i class="fas fa-trash"></i></button>
+                                            </div>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
                             <?php else: ?>
                                 <tr>
-                                    <td colspan="6" class="text-center">Aucun utilisateur trouvé. Essayez d'ajuster votre recherche ou vos filtres.</td>
+                                    <td colspan="6" class="text-center">No users found. Try adjusting your search or filters.</td>
                                 </tr>
                             <?php endif; ?>
                         </tbody>
@@ -246,7 +275,7 @@ $totalPages = ceil(count($filteredUsers) / $limit);
                 <?php if ($totalPages > 1): ?>
                 <div class="pagination">
                     <?php if ($page > 1): ?>
-                        <a href="?page=<?php echo $page-1; ?>&search=<?php echo urlencode($search); ?>&filter=<?php echo $filter; ?>" class="pagination-btn prev">&laquo; Précédent</a>
+                        <a href="?page=<?php echo $page-1; ?>&search=<?php echo urlencode($search); ?>&filter=<?php echo $filter; ?>" class="pagination-btn prev"><i class="fas fa-chevron-left"></i> Previous</a>
                     <?php endif; ?>
                     
                     <div class="pagination-numbers">
@@ -258,7 +287,7 @@ $totalPages = ceil(count($filteredUsers) / $limit);
                     </div>
                     
                     <?php if ($page < $totalPages): ?>
-                        <a href="?page=<?php echo $page+1; ?>&search=<?php echo urlencode($search); ?>&filter=<?php echo $filter; ?>" class="pagination-btn next">Suivant &raquo;</a>
+                        <a href="?page=<?php echo $page+1; ?>&search=<?php echo urlencode($search); ?>&filter=<?php echo $filter; ?>" class="pagination-btn next">Next <i class="fas fa-chevron-right"></i></a>
                     <?php endif; ?>
                 </div>
                 <?php endif; ?>
@@ -266,14 +295,146 @@ $totalPages = ceil(count($filteredUsers) / $limit);
         </main>
     </div>
     
+    <!-- Add User Modal -->
+    <div class="modal-overlay" id="addUserModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Add New User</h3>
+                <button class="modal-close" id="closeModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="add-user.php" class="settings-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="name">Full Name</label>
+                            <input type="text" id="name" name="name" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email">Email Address</label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input type="password" id="password" name="password" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="confirm_password">Confirm Password</label>
+                            <input type="password" id="confirm_password" name="confirm_password" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="role">User Role</label>
+                        <select id="role" name="role" required>
+                            <option value="student">Student</option>
+                            <option value="instructor">Instructor</option>
+                            <option value="admin">Administrator</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="status">Status</label>
+                        <select id="status" name="status" required>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                            <option value="pending">Pending</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-outline" id="cancelAdd">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Add User</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Delete User Form (Hidden) -->
+    <form id="deleteUserForm" method="POST" action="delete-user.php" style="display: none;">
+        <input type="hidden" name="id" id="deleteUserId">
+    </form>
+    
     <script>
+        function confirmDeleteUser(userId) {
+            if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+                document.getElementById('deleteUserId').value = userId;
+                document.getElementById('deleteUserForm').submit();
+            }
+        }
+        
         document.addEventListener('DOMContentLoaded', function() {
+            const addUserBtn = document.getElementById('addUserBtn');
+            const addUserModal = document.getElementById('addUserModal');
+            const closeModal = document.getElementById('closeModal');
+            const cancelAdd = document.getElementById('cancelAdd');
             const menuToggle = document.getElementById('menuToggle');
-            const adminContainer = document.querySelector('.admin-container');
+            const adminContainer = document.getElementById('adminContainer');
+            const sidebar = document.getElementById('sidebar');
             
+            // Toggle sidebar
             menuToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('collapsed');
                 adminContainer.classList.toggle('sidebar-collapsed');
             });
+            
+            // Add user modal
+            if (addUserBtn && addUserModal) {
+                addUserBtn.addEventListener('click', function() {
+                    addUserModal.classList.add('active');
+                    document.body.classList.add('modal-open');
+                });
+                
+                function closeModalFunction() {
+                    addUserModal.classList.remove('active');
+                    document.body.classList.remove('modal-open');
+                }
+                
+                if (closeModal) {
+                    closeModal.addEventListener('click', closeModalFunction);
+                }
+                
+                if (cancelAdd) {
+                    cancelAdd.addEventListener('click', closeModalFunction);
+                }
+                
+                addUserModal.addEventListener('click', function(e) {
+                    if (e.target === addUserModal) {
+                        closeModalFunction();
+                    }
+                });
+            }
+            
+            // Close alerts
+            const closeAlerts = document.querySelectorAll('.close-alert');
+            closeAlerts.forEach(function(closeAlert) {
+                closeAlert.addEventListener('click', function() {
+                    const alert = this.closest('.alert');
+                    alert.style.opacity = '0';
+                    setTimeout(function() {
+                        alert.style.display = 'none';
+                    }, 300);
+                });
+            });
+            
+            // Form validation
+            const userForm = document.querySelector('form[action="add-user.php"]');
+            if (userForm) {
+                userForm.addEventListener('submit', function(e) {
+                    const password = document.getElementById('password').value;
+                    const confirmPassword = document.getElementById('confirm_password').value;
+                    
+                    if (password !== confirmPassword) {
+                        e.preventDefault();
+                        alert('Passwords do not match!');
+                    }
+                });
+            }
         });
     </script>
 </body>

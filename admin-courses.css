@@ -1,0 +1,191 @@
+
+.courses-table-container {
+    background-color: var(--white);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    margin-bottom: var(--space-lg);
+  }
+  
+
+  .courses-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  
+  .courses-table th,
+  .courses-table td {
+    padding: var(--space-md);
+    text-align: left;
+    border-bottom: 1px solid var(--light-gray);
+  }
+  
+  .courses-table th {
+    background-color: var(--off-white);
+    font-weight: 600;
+    color: var(--dark-gray);
+  }
+  
+  .courses-table tr:last-child td {
+    border-bottom: none;
+  }
+  
+  .courses-table tr:hover {
+    background-color: rgba(var(--primary-rgb), 0.05);
+  }
+  
+  .course-info {
+    display: flex;
+    align-items: center;
+  }
+  
+  .course-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--primary-light);
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    margin-right: var(--space-sm);
+  }
+  
+  .course-title {
+    font-weight: 500;
+    color: var(--black);
+  }
+  
+  .rating {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--dark-gray);
+  }
+  
+  .rating .fa-star {
+    color: #ffc107;
+    font-size: 0.85rem;
+  }
+  
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+  
+  .status-badge.status-active {
+    background-color: rgba(25, 135, 84, 0.1);
+    color: var(--green);
+  }
+  
+  .status-badge.status-inactive {
+    background-color: rgba(220, 53, 69, 0.1);
+    color: var(--red);
+  }
+  
+  .action-buttons {
+    display: flex;
+    gap: var(--space-xs);
+  }
+  
+  .action-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+  }
+  
+  .view-btn {
+    background-color: rgba(var(--primary-rgb), 0.1);
+    color: var(--primary);
+  }
+  
+  .view-btn:hover {
+    background-color: var(--primary);
+    color: var(--white);
+  }
+  
+  .edit-btn {
+    background-color: rgba(var(--accent-rgb), 0.1);
+    color: var(--accent);
+  }
+  
+  .edit-btn:hover {
+    background-color: var(--accent);
+    color: var(--white);
+  }
+  
+  .delete-btn {
+    background-color: rgba(var(--red-rgb), 0.1);
+    color: var(--red);
+    border: none;
+    cursor: pointer;
+  }
+  
+  .delete-btn:hover {
+    background-color: var(--red);
+    color: var(--white);
+  }
+  
+  /* Radio Group */
+  .radio-group {
+    display: flex;
+    gap: var(--space-md);
+  }
+  
+  .radio-label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    cursor: pointer;
+  }
+  
+  .radio-label input[type="radio"] {
+    margin: 0;
+  }
+  
+ 
+
+  @media (max-width: 1200px) {
+    .courses-table th:nth-child(3),
+    .courses-table td:nth-child(3),
+    .courses-table th:nth-child(7),
+    .courses-table td:nth-child(7) {
+      display: none;
+    }
+  }
+  
+  @media (max-width: 991px) {
+    .courses-table th:nth-child(4),
+    .courses-table td:nth-child(4),
+    .courses-table th:nth-child(5),
+    .courses-table td:nth-child(5) {
+      display: none;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .courses-table th:nth-child(2),
+    .courses-table td:nth-child(2),
+    .courses-table th:nth-child(6),
+    .courses-table td:nth-child(6) {
+      display: none;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .action-buttons {
+      flex-direction: column;
+      gap: 4px;
+    }
+  }
+  
