@@ -3,7 +3,7 @@ include 'db.php';
 $success = '';
 $error = '';
 
-// Traitement du formulaire
+
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
   $username = $_POST["username"] ?? '';
   $email = $_POST["email"] ?? '';
@@ -181,7 +181,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     </div>
     <script>
       document.addEventListener('DOMContentLoaded', function() {
-        // Terms modal functionality
         const termsLink = document.querySelector('.terms-link');
         const termsModal = document.getElementById('terms-modal');
         const modalClose = document.querySelector('.modal-close');
@@ -207,7 +206,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             });
           }
           
-          // Close modal when clicking outside
           window.addEventListener('click', function(e) {
             if (e.target === termsModal) {
               termsModal.classList.remove('active');
