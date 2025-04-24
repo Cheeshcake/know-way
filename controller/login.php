@@ -1,15 +1,15 @@
 <?php
 session_start();
 if (!isset($_SESSION['is_logged_in'])) {
-    header("Location: users.php");
+    header("Location: ../view/users.php");
     exit();
 }
 
 if ($_SESSION['role'] !== 'admin') {
-    header("Location: dashboard.php"); // Redirige vers une page non-admin
+    header("Location: ../view/dashboard.php"); // Redirige vers une page non-admin
     exit();
 }
-include 'db.php';
+include '../config/db.php';
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $email = $_POST["email"] ?? '';
@@ -17,7 +17,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     
     if (empty($email) || empty($password)) {
         $_SESSION['login_error'] = "Veuillez remplir tous les champs.";
-        header("Location: index.html");
+        header("Location: ../view/index.php");
         exit();
     }
     
@@ -43,7 +43,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $_SESSION['role'] = $user['role'];
             $_SESSION['is_logged_in'] = true;
             
-            header("Location: admin.php");
+            header("Location: ../view/admin.php");
             exit();
         } else {
             $_SESSION['login_error'] = "Email ou mot de passe incorrect.";
@@ -56,7 +56,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $conn->close();
     
     // Rediriger vers la page de connexion avec un message d'erreur
-    header("Location: index.html");
+    header("Location: ../view/index.php");
     exit();
 }
 ?>
