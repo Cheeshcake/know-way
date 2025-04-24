@@ -239,6 +239,9 @@ h2 {
   border-radius: 8px;
   padding: 0 12px;
   box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .input-group:nth-child(1) {
@@ -308,6 +311,45 @@ h2 {
 .input-group input:focus ~ .line::after,
 .input-group input:valid ~ .line::after {
   width: 100%;
+}
+
+/* Password visibility toggle */
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  cursor: pointer;
+  color: var(--gray);
+  font-size: 1.2rem;
+  transition: color var(--transition-fast);
+  background: none;
+  border: none;
+  outline: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  padding: 0;
+  margin: 0;
+  width: 24px;
+  height: 24px;
+}
+
+.password-toggle:hover {
+  color: var(--primary);
+}
+
+.password-toggle svg {
+  width: 20px;
+  height: 20px;
+}
+
+.input-group.password-input {
+  position: relative;
+}
+
+.input-group.password-input input {
+  padding-right: 40px;
 }
 
 /* Remember & Forgot */
