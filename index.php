@@ -1,5 +1,5 @@
 <?php
-// Root index.php - Redirect to view/index.html
-header("Location: view/index.html");
+// Root index.php - Redirect to the landing page
+header("Location: view/landing.html");
 exit();
 ?> 
