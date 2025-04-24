@@ -1,0 +1,468 @@
+:root {
+  /* Modern color palette */
+  --primary: #4361ee;
+  --primary-light: #4895ef;
+  --secondary: #4cc9f0;
+  --accent: #7209b7;
+  --accent-light: #9d4edd;
+  --white: #ffffff;
+  --off-white: #f8f9fa;
+  --light-gray: #e9ecef;
+  --mid-gray: #dee2e6;
+  --gray: #6c757d;
+  --dark-gray: #343a40;
+  --black: #212529;
+  --green: #198754;
+  --yellow: #ffc107;
+  --red: #dc3545;
+}
+
+/* Dashboard specific styles */
+.dashboard-container {
+  width: 100%;
+  margin: 0 auto;
+  padding: 50px 100px;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--light-gray);
+}
+
+.user-welcome {
+  display: flex;
+  align-items: center;
+}
+
+.user-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-right: 15px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.welcome-text h1 {
+  font-size: 1.8rem;
+  margin-bottom: 5px;
+  color: var(--black);
+}
+
+.welcome-text p {
+  color: var(--gray);
+  font-size: 0.95rem;
+}
+
+.dashboard-actions {
+  display: flex;
+  gap: 15px;
+}
+
+.action-btn {
+  background-color: var(--primary);
+  color: var(--white);
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(67, 97, 238, 0.15);
+}
+
+.action-btn:hover {
+  background-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(67, 97, 238, 0.2);
+}
+
+.action-btn.outline {
+  background-color: transparent;
+  color: var(--primary);
+  border: 1px solid var(--primary);
+}
+
+.action-btn.outline:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 350px;
+  gap: 30px;
+  margin-bottom: 40px;
+}
+
+.main-content {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.progress-panel {
+  background-color: var(--white);
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.panel-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.panel-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--black);
+}
+
+.view-all {
+  color: var(--primary);
+  font-weight: 500;
+  font-size: 0.9rem;
+  text-decoration: none;
+}
+
+.progress-stats {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 25px;
+}
+
+.stat-item {
+  text-align: center;
+  flex: 1;
+}
+
+.stat-number {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 5px;
+  color: var(--primary);
+}
+
+.stat-label {
+  color: var(--gray);
+  font-size: 0.9rem;
+}
+
+.progress-current {
+  background-color: var(--light-gray);
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+}
+
+.progress-current h4 {
+  font-size: 1.05rem;
+  margin-bottom: 15px;
+  color: var(--black);
+}
+
+.progress-bar-container {
+  width: 100%;
+  height: 8px;
+  background-color: var(--mid-gray);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 15px;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(to right, var(--primary), var(--accent));
+  width: 75%; /* Example progress */
+  border-radius: 4px;
+}
+
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  color: var(--gray);
+  font-size: 0.85rem;
+}
+
+.next-lesson {
+  margin-top: 10px;
+}
+
+.next-lesson p {
+  color: var(--dark-gray);
+  font-size: 0.9rem;
+  margin-bottom: 5px;
+}
+
+.next-lesson a {
+  color: var(--primary);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.courses-panel {
+  background-color: var(--white);
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.courses-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.course-card {
+  background-color: var(--off-white);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+}
+
+.course-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+}
+
+.course-img {
+  height: 140px;
+  overflow: hidden;
+}
+
+.course-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.course-card:hover .course-img img {
+  transform: scale(1.1);
+}
+
+.course-content {
+  padding: 15px;
+}
+
+.course-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: var(--black);
+  line-height: 1.4;
+}
+
+.course-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.enroll-btn {
+  font-size: 0.85rem;
+  padding: 6px 12px;
+  background-color: var(--primary-light);
+  color: var(--white);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.enroll-btn:hover {
+  background-color: var(--primary);
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.profile-panel,
+.schedule-panel {
+  background-color: var(--white);
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.profile-info {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.profile-avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  font-weight: 600;
+  margin: 0 auto 15px;
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+.profile-name {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 5px;
+  color: var(--black);
+}
+
+.profile-email {
+  color: var(--gray);
+  font-size: 0.9rem;
+  margin-bottom: 15px;
+}
+
+.profile-status {
+  display: inline-block;
+  padding: 5px 12px;
+  background-color: rgba(67, 97, 238, 0.1);
+  color: var(--primary);
+  border-radius: 50px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.profile-links {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.profile-link {
+  padding: 10px 15px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: var(--dark-gray);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.profile-link:hover {
+  background-color: var(--light-gray);
+  color: var(--primary);
+}
+
+.schedule-item {
+  padding: 15px;
+  border-left: 3px solid var(--primary);
+  background-color: var(--off-white);
+  border-radius: 0 8px 8px 0;
+  margin-bottom: 15px;
+}
+
+.schedule-item:last-child {
+  margin-bottom: 0;
+}
+
+.schedule-time {
+  font-size: 0.8rem;
+  color: var(--gray);
+  margin-bottom: 5px;
+}
+
+.schedule-title {
+  font-weight: 600;
+  margin-bottom: 5px;
+  color: var(--black);
+}
+
+.schedule-desc {
+  font-size: 0.9rem;
+  color: var(--gray);
+}
+
+.logout-btn {
+  background-color: rgba(220, 53, 69, 0.1);
+  color: var(--red);
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  text-align: center;
+  margin-top: 15px;
+  text-decoration: none;
+  display: block;
+}
+
+.logout-btn:hover {
+  background-color: var(--red);
+  color: var(--white);
+}
+
+@media (max-width: 991px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .courses-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .sidebar {
+    grid-template-columns: repeat(2, 1fr);
+    display: grid;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  .courses-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    grid-template-columns: 1fr;
+  }
+
+  .progress-stats {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .stat-item {
+    padding: 15px;
+    background-color: var(--off-white);
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-align: left;
+  }
+
+  .stat-number {
+    font-size: 1.5rem;
+    margin-bottom: 0;
+  }
+}

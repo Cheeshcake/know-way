@@ -9,6 +9,17 @@
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
     />
+    <style>
+      .error-message {
+        background-color: rgba(220, 53, 69, 0.1);
+        color: #dc3545;
+        padding: 10px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        font-size: 0.9rem;
+        display: none;
+      }
+    </style>
   </head>
   <body>
     <div class="container">
@@ -27,34 +38,35 @@
           </div>
         </div>
         <div class="form-panel">
-          <form>
+          <form method="POST" action="../controller/login.php" id="loginForm">
             <h2>Welcome back</h2>
             <p class="form-subtitle">
               Sign in to continue your learning journey
             </p>
 
+            <div class="error-message" id="errorMessage"></div>
+
             <div class="input-group">
-              <input type="text" id="email" required />
+              <input type="email" id="email" name="email" required />
               <label for="email">Email</label>
               <div class="line"></div>
             </div>
 
             <div class="input-group">
-              <input type="password" id="password" required />
+              <input type="password" id="password" name="password" required />
               <label for="password">Password</label>
               <div class="line"></div>
             </div>
 
             <div class="remember-forgot">
               <div class="remember">
-                <input type="checkbox" id="remember" />
+                <input type="checkbox" id="remember" name="remember" />
                 <label for="remember">Remember me</label>
               </div>
               <a href="#" class="forgot">Forgot password?</a>
             </div>
 
-            <!-- <button type="submit" class="btn">Sign In</button> -->
-            <button class="btn"><a href="admin.php">Sign In</a></button>
+            <button type="submit" class="btn">Sign In</button>
 
             <div class="divider">
               <span>or</span>
@@ -73,5 +85,19 @@
         </div>
       </div>
     </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Check for error parameter in URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const error = urlParams.get("error");
+
+        if (error) {
+          const errorMessage = document.getElementById("errorMessage");
+          errorMessage.textContent = decodeURIComponent(error);
+          errorMessage.style.display = "block";
+        }
+      });
+    </script>
   </body>
 </html>

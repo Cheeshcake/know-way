@@ -6,49 +6,73 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// For demonstration purposes, set admin status
-// In a real application, this would come from database
-$_SESSION['role'] = true;
+// Check if user is logged in
+if (!isset($_SESSION['user_id']) || empty($_SESSION['user_id'])) {
+    // Redirect to login page
+    header('Location: index.html');
+    exit;
+}
 
-// User data retrieval (replace with your database code)
-$user = [
-    'id' => 1,
-    'name' => 'Nourane abdella',
-    'email' => 'Nourane.abdella@example.com',
-    'avatar' => null,
-    'phone' => '+216 24 682 456',
-    'bio' => 'Student passionate about online learning and personal development.',
-    'notifications' => [
-        'email_course_updates' => true,
-        'email_new_messages' => true,
-        'email_reminders' => false,
-        'browser_notifications' => true,
-        'sms_notifications' => false
+// Include database connection
+include '../config/db.php';
+
+// Check user role and redirect if necessary
+$isAdmin = $_SESSION['role'] === 'admin';
+if (!$isAdmin) {
+    // For non-admin users, redirect to a different settings page if needed
+    // For now, we'll use the same settings page for all users
+}
+
+// Get user data from database
+$user_id = $_SESSION['user_id'];
+$user_query = "SELECT * FROM users WHERE id = ?";
+$stmt = $conn->prepare($user_query);
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result->num_rows === 1) {
+    $user = $result->fetch_assoc();
+} else {
+    // User not found, redirect to login
+    header('Location: index.html');
+    exit;
+}
+
+// For demonstration purposes
+// In a real application, this would come from database
+$user['notifications'] = [
+    'email_course_updates' => true,
+    'email_new_messages' => true,
+    'email_reminders' => false,
+    'browser_notifications' => true,
+    'sms_notifications' => false
+];
+
+$user['security'] = [
+    'two_factor_auth' => false,
+    'last_password_change' => '22/04/2025',
+    'active_sessions' => 2
+];
+
+$user['courses'] = [
+    [
+        'id' => 1,
+        'title' => 'Introduction to Web Development',
+        'progress' => 75,
+        'last_activity' => '18/04/2025'
     ],
-    'security' => [
-        'two_factor_auth' => false,
-        'last_password_change' => '22/04/2025',
-        'active_sessions' => 2
+    [
+        'id' => 2,
+        'title' => 'Advanced Digital Marketing',
+        'progress' => 45,
+        'last_activity' => '10/03/2025'
     ],
-    'courses' => [
-        [
-            'id' => 1,
-            'title' => 'Introduction to Web Development',
-            'progress' => 75,
-            'last_activity' => '18/04/2025'
-        ],
-        [
-            'id' => 2,
-            'title' => 'Advanced Digital Marketing',
-            'progress' => 45,
-            'last_activity' => '10/03/2025'
-        ],
-        [
-            'id' => 3,
-            'title' => 'Photography for Beginners',
-            'progress' => 90,
-            'last_activity' => '04/10/2025'
-        ]
+    [
+        'id' => 3,
+        'title' => 'Photography for Beginners',
+        'progress' => 90,
+        'last_activity' => '04/10/2025'
     ]
 ];
 
@@ -73,7 +97,7 @@ $showSuccess = isset($_GET['success']) && $_GET['success'] == 1;
 
 // Get initials for avatar placeholder
 $initials = '';
-$name_parts = explode(' ', $user['name']);
+$name_parts = explode(' ', $user['username']);
 foreach ($name_parts as $part) {
     $initials .= substr($part, 0, 1);
 }
@@ -102,7 +126,7 @@ foreach ($name_parts as $part) {
                 <ul>
                     <li><a href="admin.php"><span class="nav-icon dashboard-icon"></span>Dashboard</a></li>
                     <li><a href="#"><span class="nav-icon courses-icon"></span>Courses</a></li>
-                    <li><a href="#"><span class="nav-icon users-icon"></span>Users</a></li>
+                    <li><a href="users.php"><span class="nav-icon users-icon"></span>Users</a></li>
                     <li><a href="#"><span class="nav-icon stats-icon"></span>Statistics</a></li>
                     <li class="active"><a href="settings.php"><span class="nav-icon settings-icon"></span>Settings</a></li>
                     
@@ -129,13 +153,13 @@ foreach ($name_parts as $part) {
                 <div class="header-right">
                     <div class="admin-profile">
                         <div class="admin-avatar">
-                            <?php if ($user['avatar']): ?>
+                            <?php if (isset($user['avatar']) && $user['avatar']): ?>
                                 <img src="<?php echo htmlspecialchars($user['avatar']); ?>" alt="Avatar">
                             <?php else: ?>
                                 <?php echo htmlspecialchars($initials); ?>
                             <?php endif; ?>
                         </div>
-                        <span class="admin-name"><?php echo htmlspecialchars($user['name']); ?></span>
+                        <span class="admin-name"><?php echo htmlspecialchars($user['username']); ?></span>
                     </div>
                 </div>
             </header>
@@ -153,13 +177,13 @@ foreach ($name_parts as $part) {
                     <div class="settings-sidebar">
                         <div class="user-info-card">
                             <div class="user-avatar large">
-                                <?php if ($user['avatar']): ?>
+                                <?php if (isset($user['avatar']) && $user['avatar']): ?>
                                     <img src="<?php echo htmlspecialchars($user['avatar']); ?>" alt="Avatar">
                             <?php else: ?>
                                 <?php echo htmlspecialchars($initials); ?>
                             <?php endif; ?>
                             </div>
-                            <h3 class="user-name"><?php echo htmlspecialchars($user['name']); ?></h3>
+                            <h3 class="user-name"><?php echo htmlspecialchars($user['username']); ?></h3>
                             <p class="user-email"><?php echo htmlspecialchars($user['email']); ?></p>
                         </div>
                         
@@ -193,7 +217,7 @@ foreach ($name_parts as $part) {
                                         <label for="avatar">Profile Picture</label>
                                         <div class="avatar-upload">
                                             <div class="avatar-preview">
-                                                <?php if ($user['avatar']): ?>
+                                                <?php if (isset($user['avatar']) && $user['avatar']): ?>
                                                     <img src="<?php echo htmlspecialchars($user['avatar']); ?>" alt="Avatar">
                                                 <?php else: ?>
                                                     <div class="avatar-placeholder">
@@ -206,7 +230,7 @@ foreach ($name_parts as $part) {
                                                     Upload
                                                 </label>
                                                 <input type="file" id="avatar-input" name="avatar" accept="image/*" class="hidden">
-                                                <?php if ($user['avatar']): ?>
+                                                <?php if (isset($user['avatar']) && $user['avatar']): ?>
                                                 <button type="button" class="btn btn-outline btn-danger">
                                                     Remove
                                                 </button>
@@ -218,7 +242,7 @@ foreach ($name_parts as $part) {
                                     <div class="form-row">
                                         <div class="form-group">
                                             <label for="name">Full Name</label>
-                                            <input type="text" id="name" name="name" value="<?php echo htmlspecialchars($user['name']); ?>" required>
+                                            <input type="text" id="name" name="name" value="<?php echo htmlspecialchars($user['username']); ?>" required>
                                         </div>
                                         
                                         <div class="form-group">
@@ -229,12 +253,12 @@ foreach ($name_parts as $part) {
                                     
                                     <div class="form-group">
                                         <label for="phone">Phone Number</label>
-                                        <input type="tel" id="phone" name="phone" value="<?php echo htmlspecialchars($user['phone']); ?>">
+                                        <input type="tel" id="phone" name="phone" value="<?php echo isset($user['phone']) ? htmlspecialchars($user['phone']) : ''; ?>">
                                     </div>
                                     
                                     <div class="form-group">
                                         <label for="bio">Biography</label>
-                                        <textarea id="bio" name="bio" rows="4"><?php echo htmlspecialchars($user['bio']); ?></textarea>
+                                        <textarea id="bio" name="bio" rows="4"><?php echo isset($user['bio']) ? htmlspecialchars($user['bio']) : ''; ?></textarea>
                                     </div>
                                     
                                     <div class="form-actions">

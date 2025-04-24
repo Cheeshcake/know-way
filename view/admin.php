@@ -1,5 +1,46 @@
 <?php
+// Start session if not already started
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Check if user is logged in
+if (!isset($_SESSION['user_id']) || empty($_SESSION['user_id'])) {
+    // Redirect to login page
+    header('Location: index.html');
+    exit;
+}
+
+// Check if user is an admin (role-based access control)
+if ($_SESSION['role'] !== 'admin') {
+    // Redirect to learner dashboard if not admin
+    header('Location: dashboard.php');
+    exit;
+}
+
+// Store session username in a different variable to avoid conflicts
+$user_session_name = $_SESSION['username'];
+$initials = '';
+$name_parts = explode(' ', $user_session_name);
+foreach ($name_parts as $part) {
+    $initials .= substr($part, 0, 1);
+}
+
+// Include database - note this defines its own $username for DB connection
 include '../config/db.php';
+
+// Fetch user details for avatar (if needed)
+$user_id = $_SESSION['user_id'];
+$user_query = "SELECT avatar FROM users WHERE id = ?";
+$stmt = $conn->prepare($user_query);
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$result_user = $stmt->get_result();
+$user_avatar = null;
+if ($result_user->num_rows === 1) {
+    $user_data = $result_user->fetch_assoc();
+    $user_avatar = $user_data['avatar'];
+}
 
 $search = $_GET['search'] ?? '';
 $filter = $_GET['filter'] ?? '';
@@ -47,14 +88,14 @@ $isLoading = false;
                 <ul>
                     <li class="active"><a href="admin.php"><span class="nav-icon dashboard-icon"></span>Dashboard</a></li>
                     <li><a href="#"><span class="nav-icon courses-icon"></span>Courses</a></li>
-                    <li><a href="#"><span class="nav-icon users-icon"></span>Users</a></li>
+                    <li><a href="users.php"><span class="nav-icon users-icon"></span>Users</a></li>
                     <li><a href="#"><span class="nav-icon stats-icon"></span>Statistics</a></li>
                     <li><a href="settings.php"><span class="nav-icon settings-icon"></span>Settings</a></li>
                 </ul>
             </nav>
             
             <div class="sidebar-footer">
-                <a href="index.html" class="logout-btn">Sign Out</a>
+                <a href="../controller/logout.php" class="logout-btn">Sign Out</a>
             </div>
         </aside>
         
@@ -72,8 +113,14 @@ $isLoading = false;
                 
                 <div class="header-right">
                     <div class="admin-profile">
-                        <span class="admin-avatar">A</span>
-                        <span class="admin-name">Admin</span>
+                        <div class="admin-avatar">
+                            <?php if (isset($user_avatar) && $user_avatar): ?>
+                                <img src="<?php echo htmlspecialchars($user_avatar); ?>" alt="Avatar">
+                            <?php else: ?>
+                                <?php echo htmlspecialchars($initials); ?>
+                            <?php endif; ?>
+                        </div>
+                        <span class="admin-name"><?= htmlspecialchars($user_session_name) ?></span>
                     </div>
                 </div>
             </header>
