@@ -1,14 +1,11 @@
 <?php
-// dashboard.php - User Dashboard Page
-
-// Start session if not already started
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
 // For demonstration purposes, set admin status
 // In a real application, this would come from database
-$_SESSION['is_admin'] = true;
+$_SESSION['role'] = true;
 
 // User data retrieval (replace with your database code)
 $user = [

@@ -1,11 +1,10 @@
 <?php
-// Start session if not already started
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
 // Check if user is admin
-if (!isset($_SESSION['is_admin']) || !$_SESSION['is_admin']) {
+if (!isset($_SESSION['role']) || !$_SESSION['role']) {
     // Redirect non-admin users
     header('Location: dashboard.php');
     exit;

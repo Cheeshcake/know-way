@@ -1,5 +1,4 @@
 <?php
-// interface.php - Page d'accueil de KnowWay
 
 
 if (session_status() === PHP_SESSION_NONE) {

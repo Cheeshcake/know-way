@@ -8,7 +8,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // For demonstration purposes, set admin status
 // In a real application, this would come from database
-$_SESSION['is_admin'] = true;
+$_SESSION['role'] = true;
 
 // User data retrieval (replace with your database code)
 $user = [
