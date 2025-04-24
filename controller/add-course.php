@@ -1,11 +1,11 @@
 <?php
-include 'db.php';
+include '../config/db.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $title = trim(htmlspecialchars($_POST['title']));
     $description = trim(htmlspecialchars($_POST['description']));
     
-    $target_dir = "uploads/";
+    $target_dir = "../view/uploads/";
     
     if (!file_exists($target_dir)) {
         mkdir($target_dir, 0777, true);
@@ -41,7 +41,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->bind_param("sss", $title, $description, $image);
     
     if ($stmt->execute()) {
-        header("Location: admin.php?success=Course added successfully");
+        header("Location: ../view/admin.php?success=Course added successfully");
         exit;
     } else {
         echo "Error: " . $stmt->error;
@@ -49,7 +49,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
     $stmt->close();
 } else {
-    header("Location: admin.php");
+    header("Location: ../view/admin.php");
     exit;
 }
 

@@ -1,5 +1,5 @@
 <?php
-include 'db.php';
+include '../config/db.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $id = filter_var($_POST['id'], FILTER_VALIDATE_INT);
@@ -18,7 +18,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $image = $row['image'];
         
         if(!empty($image)) {
-            $image_path = "uploads/" . $image;
+            $image_path = "../view/uploads/" . $image;
             if(file_exists($image_path)) {
                 unlink($image_path);
             }
@@ -28,7 +28,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $delete_stmt->bind_param("i", $id);
         
         if ($delete_stmt->execute()) {
-            header("Location: admin.php?success=Course deleted successfully");
+            header("Location: ../view/admin.php?success=Course deleted successfully");
             exit;
         } else {
             echo "Error: " . $delete_stmt->error;
@@ -41,7 +41,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
     $stmt->close();
 } else {
-    header("Location: admin.php");
+    header("Location: ../view/admin.php");
     exit;
 }
 

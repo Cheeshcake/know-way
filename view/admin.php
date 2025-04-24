@@ -1,5 +1,5 @@
 <?php
-include 'db.php';
+include '../config/db.php';
 
 $search = $_GET['search'] ?? '';
 $filter = $_GET['filter'] ?? '';
@@ -49,7 +49,7 @@ $isLoading = false;
                     <li><a href="#"><span class="nav-icon courses-icon"></span>Courses</a></li>
                     <li><a href="#"><span class="nav-icon users-icon"></span>Users</a></li>
                     <li><a href="#"><span class="nav-icon stats-icon"></span>Statistics</a></li>
-                    <li><a href="#"><span class="nav-icon settings-icon"></span>Settings</a></li>
+                    <li><a href="settings.php"><span class="nav-icon settings-icon"></span>Settings</a></li>
                 </ul>
             </nav>
             
@@ -148,7 +148,7 @@ $isLoading = false;
                                         <p class="course-desc"><?= htmlspecialchars(substr($row['description'], 0, 100)) ?>...</p>
                                         <div class="course-actions">
                                             <button class="edit-btn">Edit</button>
-                                            <form method="POST" action="delete-course.php" class="delete-form" onsubmit="return confirm('Are you sure you want to delete this course?');">
+                                            <form method="POST" action="../controller/delete-course.php" class="delete-form" onsubmit="return confirm('Are you sure you want to delete this course?');">
                                                 <input type="hidden" name="id" value="<?= $row['id'] ?>">
                                                 <button type="submit" class="delete-btn">Delete</button>
                                             </form>
@@ -196,7 +196,7 @@ $isLoading = false;
                 <button class="modal-close" id="closeModal">&times;</button>
             </div>
             <div class="modal-body">
-                <form method="POST" action="add-course.php" enctype="multipart/form-data" class="add-course-form">
+                <form method="POST" action="../controller/add-course.php" enctype="multipart/form-data" class="add-course-form">
                     <div class="form-group">
                         <label for="title">Course Title</label>
                         <input type="text" id="title" name="title" placeholder="Enter course title" required>
