@@ -63,6 +63,21 @@ $result = $conn->query($sql);
 $total_courses = $conn->query("SELECT COUNT(*) AS total FROM courses WHERE title LIKE '%$search%'")->fetch_assoc()['total'];
 $total_pages = ceil($total_courses / $limit);
 
+// Get dashboard statistics
+// Total users count
+$total_users = $conn->query("SELECT COUNT(*) AS total FROM users")->fetch_assoc()['total'];
+
+// Total course likes
+$total_likes = $conn->query("SELECT COUNT(*) AS total FROM course_likes")->fetch_assoc()['total'];
+
+// Total quiz attempts
+$total_attempts = $conn->query("SELECT COUNT(*) AS total FROM quiz_attempts")->fetch_assoc()['total'];
+
+// Average quiz scores
+$avg_score_result = $conn->query("SELECT AVG(score) AS avg_score FROM quiz_attempts WHERE score IS NOT NULL");
+$avg_score_row = $avg_score_result->fetch_assoc();
+$avg_score = $avg_score_row['avg_score'] ? number_format($avg_score_row['avg_score'], 1) : '0.0';
+
 $isLoading = false; 
 ?>
 
@@ -155,16 +170,16 @@ $isLoading = false;
                         <p class="stat-number"><?= $total_courses ?></p>
                     </div>
                     <div class="stat-card">
-                        <h3>Active Users</h3>
-                        <p class="stat-number">217</p>
+                        <h3>Registered Users</h3>
+                        <p class="stat-number"><?= $total_users ?></p>
                     </div>
                     <div class="stat-card">
-                        <h3>Course Completions</h3>
-                        <p class="stat-number">548</p>
+                        <h3>Course Likes</h3>
+                        <p class="stat-number"><?= $total_likes ?></p>
                     </div>
                     <div class="stat-card">
-                        <h3>Average Rating</h3>
-                        <p class="stat-number">4.8</p>
+                        <h3>Quiz Completion Rate</h3>
+                        <p class="stat-number"><?= floor($avg_score) ?>/5</p>
                     </div>
                 </div>
                 
