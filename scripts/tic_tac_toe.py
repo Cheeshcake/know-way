@@ -1,13 +1,9 @@
-#!/usr/bin/env python3
-# Tic Tac Toe AI using Minimax and Alpha-Beta Pruning
+
 import json
 import sys
 import random
 
-# Board is represented as a list of 9 strings:
-# [0, 1, 2]
-# [3, 4, 5]
-# [6, 7, 8]
+
 
 class TicTacToe:
     def __init__(self):
@@ -123,7 +119,6 @@ class TicTacToe:
         if not self.available_moves():
             return -1
         
-        # For easy mode, sometimes make a random move
         if difficulty == 'easy' and random.random() < 0.4:
             return random.choice(self.available_moves())
         
@@ -134,10 +129,8 @@ class TicTacToe:
             self.make_move(move, self.ai)
             
             if difficulty == 'hard':
-                # Use Alpha-Beta pruning
                 score = self.alpha_beta(0, float('-inf'), float('inf'), False)
             else:
-                # Use Minimax
                 score = self.minimax(0, False)
                 
             self.undo_move(move)
@@ -160,7 +153,6 @@ def handle_request(data):
             if 0 <= position < 9 and game.board[position] == '':
                 game.make_move(position, game.human)
                 
-                # Check if game is over after human move
                 if game.check_winner(game.human):
                     return {
                         'board': game.board,
@@ -174,12 +166,10 @@ def handle_request(data):
                         'winner': 'draw'
                     }
                 
-                # AI makes a move
                 ai_move = game.get_best_move(difficulty)
                 if ai_move >= 0:
                     game.make_move(ai_move, game.ai)
                     
-                    # Check if game is over after AI move
                     if game.check_winner(game.ai):
                         return {
                             'board': game.board,
@@ -201,7 +191,6 @@ def handle_request(data):
                             'ai_move': ai_move
                         }
         
-        # Just get AI move without making a human move first
         if 'get_ai_move' in data:
             ai_move = game.get_best_move(difficulty)
             if ai_move >= 0:
@@ -240,10 +229,8 @@ def handle_request(data):
 
 if __name__ == "__main__":
     try:
-        # Read input data from stdin
         data = json.loads(sys.stdin.read())
         result = handle_request(data)
-        # Output result as JSON
         print(json.dumps(result))
     except Exception as e:
         print(json.dumps({'error': str(e)})) 

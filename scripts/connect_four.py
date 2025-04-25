@@ -1,13 +1,11 @@
-#!/usr/bin/env python3
-# Connect Four AI using Minimax and Alpha-Beta Pruning
+
 import json
 import sys
 import random
 
 class ConnectFour:
     def __init__(self):
-        # Board is 6x7 grid (6 rows, 7 columns)
-        # 0 = empty, 1 = player, 2 = AI
+        
         self.rows = 6
         self.columns = 7
         self.board = [[0 for _ in range(self.columns)] for _ in range(self.rows)]
@@ -20,7 +18,7 @@ class ConnectFour:
             if self.board[row][col] == 0:
                 self.board[row][col] = piece
                 return row
-        return -1  # Column is full
+        return -1  
     
     def is_valid_location(self, col):
         """Check if a column is valid for a move"""
@@ -36,7 +34,6 @@ class ConnectFour:
     
     def check_win(self, piece):
         """Check if the given piece has won"""
-        # Check horizontal
         for row in range(self.rows):
             for col in range(self.columns - 3):
                 if (self.board[row][col] == piece and 
@@ -45,7 +42,6 @@ class ConnectFour:
                     self.board[row][col+3] == piece):
                     return True
         
-        # Check vertical
         for row in range(self.rows - 3):
             for col in range(self.columns):
                 if (self.board[row][col] == piece and 
@@ -54,7 +50,6 @@ class ConnectFour:
                     self.board[row+3][col] == piece):
                     return True
         
-        # Check diagonal (down-right)
         for row in range(self.rows - 3):
             for col in range(self.columns - 3):
                 if (self.board[row][col] == piece and 
@@ -63,7 +58,6 @@ class ConnectFour:
                     self.board[row+3][col+3] == piece):
                     return True
         
-        # Check diagonal (down-left)
         for row in range(self.rows - 3):
             for col in range(3, self.columns):
                 if (self.board[row][col] == piece and 
@@ -91,12 +85,10 @@ class ConnectFour:
         opponent_piece = self.player if piece == self.ai else self.ai
         
         score = 0
-        # Count pieces
         piece_count = self.count_pieces(window, piece)
         empty_count = self.count_pieces(window, 0)
         opponent_count = self.count_pieces(window, opponent_piece)
         
-        # Score the window
         if piece_count == 4:
             score += 100
         elif piece_count == 3 and empty_count == 1:
@@ -104,7 +96,6 @@ class ConnectFour:
         elif piece_count == 2 and empty_count == 2:
             score += 2
         
-        # Penalize opponent's potential wins
         if opponent_count == 3 and empty_count == 1:
             score -= 4
         
@@ -122,32 +113,27 @@ class ConnectFour:
         """Score the entire board position for the given piece"""
         score = 0
         
-        # Score center column
         center_col = self.get_column(self.columns // 2)
         center_count = center_col.count(piece)
         score += center_count * 3
         
-        # Score horizontal
         for row in range(self.rows):
             row_array = self.get_row(row)
             for col in range(self.columns - 3):
                 window = row_array[col:col+4]
                 score += self.evaluate_window(window, piece)
         
-        # Score vertical
         for col in range(self.columns):
             col_array = self.get_column(col)
             for row in range(self.rows - 3):
                 window = col_array[row:row+4]
                 score += self.evaluate_window(window, piece)
         
-        # Score diagonal (down-right)
         for row in range(self.rows - 3):
             for col in range(self.columns - 3):
                 window = [self.board[row+i][col+i] for i in range(4)]
                 score += self.evaluate_window(window, piece)
         
-        # Score diagonal (down-left)
         for row in range(self.rows - 3):
             for col in range(3, self.columns):
                 window = [self.board[row+i][col-i] for i in range(4)]
@@ -243,21 +229,17 @@ class ConnectFour:
         if not valid_locations:
             return -1
         
-        # For easy mode, sometimes make a random move
         if difficulty == 'easy' and random.random() < 0.5:
             return random.choice(valid_locations)
         
-        # Determine search depth based on difficulty
         if difficulty == 'easy':
             depth = 2
         else:  # hard
             depth = 4
         
         if difficulty == 'hard':
-            # Use Alpha-Beta pruning
             column, _ = self.alpha_beta(depth, float('-inf'), float('inf'), True)
         else:
-            # Use Minimax
             column, _ = self.minimax(depth, True)
             
         return column
@@ -267,7 +249,6 @@ def handle_request(data):
     try:
         game = ConnectFour()
         
-        # Load board state if provided
         if 'board' in data:
             board_data = data['board']
             if isinstance(board_data, list) and len(board_data) == game.rows and len(board_data[0]) == game.columns:
@@ -280,7 +261,6 @@ def handle_request(data):
             if 0 <= col < game.columns and game.is_valid_location(col):
                 row = game.drop_piece(col, game.player)
                 
-                # Check if game is over after player move
                 if game.check_win(game.player):
                     return {
                         'board': game.board,
@@ -294,12 +274,10 @@ def handle_request(data):
                         'winner': 'draw'
                     }
                 
-                # AI makes a move
                 ai_col = game.get_best_move(difficulty)
                 if ai_col >= 0 and game.is_valid_location(ai_col):
                     ai_row = game.drop_piece(ai_col, game.ai)
                     
-                    # Check if game is over after AI move
                     if game.check_win(game.ai):
                         return {
                             'board': game.board,
@@ -321,7 +299,6 @@ def handle_request(data):
                             'ai_move': int(ai_col)
                         }
         
-        # Just get AI move without making a player move first
         if 'get_ai_move' in data:
             ai_col = game.get_best_move(difficulty)
             if ai_col >= 0 and game.is_valid_location(ai_col):
@@ -360,10 +337,8 @@ def handle_request(data):
 
 if __name__ == "__main__":
     try:
-        # Read input data from stdin
         data = json.loads(sys.stdin.read())
         result = handle_request(data)
-        # Output result as JSON
         print(json.dumps(result))
     except Exception as e:
         print(json.dumps({'error': str(e)})) 
