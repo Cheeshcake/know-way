@@ -334,6 +334,48 @@ $error_message = $_GET['error'] ?? '';
             transform: scale(1.03);
         }
 
+        /* Course Video Styles */
+        .course-video-container {
+            margin-bottom: 30px;
+        }
+
+        .video-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #111827;
+        }
+
+        .course-video {
+            width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .video-responsive {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            height: 0;
+            overflow: hidden;
+        }
+
+        .video-responsive iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 12px;
+        }
+
+        .uploaded-video {
+            width: 100%;
+            max-height: 500px;
+            border-radius: 12px;
+            background-color: #000;
+        }
+
         /* Enhanced Course Actions */
         .course-actions {
             display: flex;
@@ -914,6 +956,42 @@ $error_message = $_GET['error'] ?? '';
         <div class="course-image">
             <img src="uploads/<?= htmlspecialchars($course['image']) ?>" alt="<?= htmlspecialchars($course['title']) ?>" onerror="this.src='placeholder-course.png'">
         </div>
+
+        <?php if (!empty($course['video'])): ?>
+        <div class="course-video-container">
+            <h3 class="video-title">Course Video</h3>
+            <div class="course-video">
+                <?php if ($course['video_type'] === 'youtube'): ?>
+                    <?php 
+                        // Extract YouTube video ID
+                        $youtube_id = '';
+                        if (preg_match('/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/', $course['video'], $matches)) {
+                            $youtube_id = $matches[1];
+                        }
+                    ?>
+                    <div class="video-responsive">
+                        <iframe width="100%" height="100%" src="https://www.youtube.com/embed/<?= $youtube_id ?>" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    </div>
+                <?php elseif ($course['video_type'] === 'vimeo'): ?>
+                    <?php 
+                        // Extract Vimeo video ID
+                        $vimeo_id = '';
+                        if (preg_match('/vimeo\.com\/(?:video\/)?(\d+)/', $course['video'], $matches)) {
+                            $vimeo_id = $matches[1];
+                        }
+                    ?>
+                    <div class="video-responsive">
+                        <iframe width="100%" height="100%" src="https://player.vimeo.com/video/<?= $vimeo_id ?>" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
+                    </div>
+                <?php elseif ($course['video_type'] === 'uploaded'): ?>
+                    <video controls class="uploaded-video">
+                        <source src="uploads/videos/<?= htmlspecialchars($course['video']) ?>" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                <?php endif; ?>
+            </div>
+        </div>
+        <?php endif; ?>
 
         <div class="course-actions">
             <form method="POST" action="../controller/toggle-like.php" id="likeForm">
