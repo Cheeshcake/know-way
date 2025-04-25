@@ -16,6 +16,9 @@ if (!isset($_SESSION['user_id']) || empty($_SESSION['user_id'])) {
 // Include database connection
 include '../config/db.php';
 
+// Initialize error messages
+$errorMsg = '';
+
 // Check user role and redirect if necessary
 $isAdmin = $_SESSION['role'] === 'admin';
 if (!$isAdmin) {
@@ -27,6 +30,11 @@ if (!$isAdmin) {
 $user_id = $_SESSION['user_id'];
 $user_query = "SELECT * FROM users WHERE id = ?";
 $stmt = $conn->prepare($user_query);
+
+if ($stmt === false) {
+    die("Error preparing statement: " . $conn->error);
+}
+
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -39,20 +47,12 @@ if ($result->num_rows === 1) {
     exit;
 }
 
-// For demonstration purposes
+// For demonstration purposes - hardcoded security data
 // In a real application, this would come from database
-$user['notifications'] = [
-    'email_course_updates' => true,
-    'email_new_messages' => true,
-    'email_reminders' => false,
-    'browser_notifications' => true,
-    'sms_notifications' => false
-];
-
 $user['security'] = [
-    'two_factor_auth' => false,
-    'last_password_change' => '22/04/2025',
-    'active_sessions' => 2
+    'two_factor_auth' => $user['two_factor_auth'] ?? false,
+    'last_password_change' => $user['last_password_change'] ?? date('d/m/Y'),
+    'active_sessions' => 1
 ];
 
 $user['courses'] = [
@@ -79,21 +79,157 @@ $user['courses'] = [
 // Form processing
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     if ($_POST['action'] === 'update_general') {
-        header('Location: settings.php?tab=general&success=1');
-        exit;
+        // Update user's general information
+        $username = $_POST['name'];
+        $email = $_POST['email'];
+        $phone = $_POST['phone'] ?? null;
+        $bio = $_POST['bio'] ?? null;
+        
+        // Check if avatar should be removed
+        $remove_avatar = isset($_POST['remove_avatar']) && $_POST['remove_avatar'] === '1';
+        
+        // Handle avatar upload if provided
+        $avatar = null;
+        $avatar_query_part = "";
+        
+        if ($remove_avatar) {
+            // Remove avatar from database and delete file if exists
+            if (isset($user['avatar']) && file_exists($user['avatar'])) {
+                unlink($user['avatar']);
+            }
+            $avatar_query_part = ", avatar = NULL";
+        } elseif (isset($_FILES['avatar']) && $_FILES['avatar']['error'] === UPLOAD_ERR_OK) {
+            $uploadDir = '../uploads/avatars/';
+            
+            // Create directory if it doesn't exist
+            if (!file_exists($uploadDir)) {
+                mkdir($uploadDir, 0777, true);
+            }
+            
+            $fileExtension = pathinfo($_FILES['avatar']['name'], PATHINFO_EXTENSION);
+            $fileName = 'avatar_' . $user_id . '_' . time() . '.' . $fileExtension;
+            $uploadPath = $uploadDir . $fileName;
+            
+            if (move_uploaded_file($_FILES['avatar']['tmp_name'], $uploadPath)) {
+                // Delete old avatar if exists
+                if (isset($user['avatar']) && file_exists($user['avatar'])) {
+                    unlink($user['avatar']);
+                }
+                $avatar = $uploadPath;
+                $avatar_query_part = ", avatar = ?";
+            }
+        }
+        
+        // Prepare SQL query
+        $update_query = "UPDATE users SET username = ?, email = ?, phone = ?, bio = ?" . $avatar_query_part . " WHERE id = ?";
+        $stmt = $conn->prepare($update_query);
+        
+        if (!empty($avatar_query_part) && strpos($avatar_query_part, "= ?") !== false) {
+            // If we're setting avatar to a new value
+            $stmt->bind_param("sssssi", $username, $email, $phone, $bio, $avatar, $user_id);
+        } else {
+            // If we're removing avatar or not changing it
+            $stmt->bind_param("ssssi", $username, $email, $phone, $bio, $user_id);
+        }
+        
+        if ($stmt->execute()) {
+            // Update session with new username
+            $_SESSION['username'] = $username;
+            header('Location: settings.php?tab=general&success=1');
+            exit;
+        } else {
+            header('Location: settings.php?tab=general&error=1');
+            exit;
+        }
     } 
     elseif ($_POST['action'] === 'update_security') {
-        header('Location: settings.php?tab=security&success=1');
-        exit;
-    }
-    elseif ($_POST['action'] === 'update_notifications') {
-        header('Location: settings.php?tab=notifications&success=1');
-        exit;
+        $current_password = $_POST['current_password'] ?? '';
+        $new_password = $_POST['new_password'] ?? '';
+        $confirm_password = $_POST['confirm_password'] ?? '';
+        $two_factor_auth = isset($_POST['two_factor_auth']) ? 1 : 0;
+        
+        // Validate current password
+        $password_query = "SELECT password FROM users WHERE id = ?";
+        $stmt = $conn->prepare($password_query);
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $user_data = $result->fetch_assoc();
+        
+        $password_updated = false;
+        
+        // Update password if provided and valid
+        if (!empty($current_password) && !empty($new_password) && !empty($confirm_password)) {
+            if (password_verify($current_password, $user_data['password'])) {
+                if ($new_password === $confirm_password) {
+                    $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
+                    $update_query = "UPDATE users SET password = ? WHERE id = ?";
+                    $stmt = $conn->prepare($update_query);
+                    $stmt->bind_param("si", $hashed_password, $user_id);
+                    
+                    if ($stmt->execute()) {
+                        $password_updated = true;
+                    }
+                } else {
+                    header('Location: settings.php?tab=security&error=passwords_mismatch');
+                    exit;
+                }
+            } else {
+                header('Location: settings.php?tab=security&error=invalid_password');
+                exit;
+            }
+        }
+        
+        // Update two-factor authentication setting
+        $check_column = "SHOW COLUMNS FROM users LIKE 'two_factor_auth'";
+        $result = $conn->query($check_column);
+        
+        if ($result->num_rows > 0) {
+            $update_2fa_query = "UPDATE users SET two_factor_auth = ? WHERE id = ?";
+            $stmt = $conn->prepare($update_2fa_query);
+            $stmt->bind_param("ii", $two_factor_auth, $user_id);
+            
+            if ($stmt->execute() || $password_updated) {
+                header('Location: settings.php?tab=security&success=1');
+                exit;
+            } else {
+                header('Location: settings.php?tab=security&error=1');
+                exit;
+            }
+        } else {
+            // Two-factor auth column doesn't exist yet, but password might have been updated
+            if ($password_updated) {
+                header('Location: settings.php?tab=security&success=1');
+                exit;
+            } else {
+                header('Location: settings.php?tab=security&error=column_missing');
+                exit;
+            }
+        }
     }
 }
 
 $activeTab = $_GET['tab'] ?? 'general';
+// Ensure activeTab is only general or security
+if ($activeTab !== 'general' && $activeTab !== 'security') {
+    $activeTab = 'general';
+}
 $showSuccess = isset($_GET['success']) && $_GET['success'] == 1;
+$showError = isset($_GET['error']);
+
+// Process error messages
+if ($showError) {
+    $errorType = $_GET['error'];
+    if ($errorType === 'passwords_mismatch') {
+        $errorMsg = 'The passwords you entered do not match.';
+    } elseif ($errorType === 'invalid_password') {
+        $errorMsg = 'The current password you entered is incorrect.';
+    } elseif ($errorType === 'column_missing') {
+        $errorMsg = 'The two-factor authentication feature is not available yet.';
+    } else {
+        $errorMsg = 'An error occurred while saving your settings. Please try again.';
+    }
+}
 
 // Get initials for avatar placeholder
 $initials = '';
@@ -127,7 +263,6 @@ foreach ($name_parts as $part) {
                     <li><a href="admin.php"><span class="nav-icon dashboard-icon"></span>Dashboard</a></li>
                     <li><a href="#"><span class="nav-icon courses-icon"></span>Courses</a></li>
                     <li><a href="users.php"><span class="nav-icon users-icon"></span>Users</a></li>
-                    <li><a href="#"><span class="nav-icon stats-icon"></span>Statistics</a></li>
                     <li class="active"><a href="settings.php"><span class="nav-icon settings-icon"></span>Settings</a></li>
                     
                 </ul>
@@ -152,11 +287,11 @@ foreach ($name_parts as $part) {
                 
                 <div class="header-right">
                     <div class="admin-profile">
-                        <div class="admin-avatar">
-                            <?php if (isset($user['avatar']) && $user['avatar']): ?>
-                                <img src="<?php echo htmlspecialchars($user['avatar']); ?>" alt="Avatar">
+                    <div class="admin-avatar" style="width: 40px; height: 40px; border-radius: 50%; overflow: hidden; background-color: #e9ecef; display: flex; align-items: center; justify-content: center; margin-right: 8px; font-weight: 600; flex-shrink: 0; text-align: center;">
+                    <?php if (isset($user['avatar']) && $user['avatar']): ?>
+                                <img src="<?php echo htmlspecialchars($user['avatar']); ?>" alt="Avatar" style="width: 40px; height: 40px; object-fit: cover; display: block; margin: 0; padding: 0;">
                             <?php else: ?>
-                                <?php echo htmlspecialchars($initials); ?>
+                                <span style="font-size: 16px;"><?php echo htmlspecialchars($initials); ?></span>
                             <?php endif; ?>
                         </div>
                         <span class="admin-name"><?php echo htmlspecialchars($user['username']); ?></span>
@@ -169,6 +304,14 @@ foreach ($name_parts as $part) {
                 <div class="alert alert-success">
                     <i class="fas fa-check-circle"></i>
                     Your settings have been successfully updated.
+                    <button class="close-alert">&times;</button>
+                </div>
+                <?php endif; ?>
+                
+                <?php if ($showError): ?>
+                <div class="alert alert-error">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <?php echo htmlspecialchars($errorMsg); ?>
                     <button class="close-alert">&times;</button>
                 </div>
                 <?php endif; ?>
@@ -196,11 +339,6 @@ foreach ($name_parts as $part) {
                                 <span class="nav-icon settings-icon"></span>
                                 Security
                             </a>
-                            <a href="?tab=notifications" class="settings-nav-item <?php echo $activeTab === 'notifications' ? 'active' : ''; ?>">
-                                <span class="nav-icon stats-icon"></span>
-                                Notifications
-                            </a>
-                            
                         </nav>
                     </div>
                     
@@ -231,9 +369,10 @@ foreach ($name_parts as $part) {
                                                 </label>
                                                 <input type="file" id="avatar-input" name="avatar" accept="image/*" class="hidden">
                                                 <?php if (isset($user['avatar']) && $user['avatar']): ?>
-                                                <button type="button" class="btn btn-outline btn-danger">
+                                                <button type="button" class="btn btn-outline btn-danger" id="remove-avatar-btn">
                                                     Remove
                                                 </button>
+                                                <input type="hidden" name="remove_avatar" id="remove-avatar" value="0">
                                                 <?php endif; ?>
                                             </div>
                                         </div>
@@ -247,7 +386,7 @@ foreach ($name_parts as $part) {
                                         
                                         <div class="form-group">
                                             <label for="email">Email Address</label>
-                                            <input type="email" id="email" name="email" value="<?php echo htmlspecialchars($user['email']); ?>" required>
+                                            <input type="email" id="email" name="email"  value="<?php echo htmlspecialchars($user['email']); ?>" required readonly>
                                         </div>
                                     </div>
                                     
@@ -327,67 +466,6 @@ foreach ($name_parts as $part) {
                                     </div>
                                 </form>
                             </div>
-                        <?php elseif ($activeTab === 'notifications'): ?>
-                            <div class="settings-panel">
-                                <h3 class="settings-panel-title">Notification Preferences</h3>
-                                <p class="settings-panel-description">Customize how you want to be notified about activities.</p>
-                                
-                                <form method="POST" action="settings.php" class="settings-form">
-                                    <input type="hidden" name="action" value="update_notifications">
-                                    
-                                    <div class="notification-section">
-                                        <h4 class="notification-section-title">Email Notifications</h4>
-                                        
-                                        <div class="form-group">
-                                            <div class="checkbox-group">
-                                                <input type="checkbox" id="email_course_updates" name="email_course_updates" <?php echo $user['notifications']['email_course_updates'] ? 'checked' : ''; ?>>
-                                                <label for="email_course_updates">Course Updates</label>
-                                            </div>
-                                            <p class="form-help">Receive emails when new content is added to your courses.</p>
-                                        </div>
-                                        
-                                        <div class="form-group">
-                                            <div class="checkbox-group">
-                                                <input type="checkbox" id="email_new_messages" name="email_new_messages" <?php echo $user['notifications']['email_new_messages'] ? 'checked' : ''; ?>>
-                                                <label for="email_new_messages">New Messages</label>
-                                            </div>
-                                            <p class="form-help">Receive emails when you get new messages.</p>
-                                        </div>
-                                        
-                                        <div class="form-group">
-                                            <div class="checkbox-group">
-                                                <input type="checkbox" id="email_reminders" name="email_reminders" <?php echo $user['notifications']['email_reminders'] ? 'checked' : ''; ?>>
-                                                <label for="email_reminders">Reminders & Deadlines</label>
-                                            </div>
-                                            <p class="form-help">Receive email reminders for course deadlines and events.</p>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="notification-section">
-                                        <h4 class="notification-section-title">Other Notifications</h4>
-                                        
-                                        <div class="form-group">
-                                            <div class="checkbox-group">
-                                                <input type="checkbox" id="browser_notifications" name="browser_notifications" <?php echo $user['notifications']['browser_notifications'] ? 'checked' : ''; ?>>
-                                                <label for="browser_notifications">Browser Notifications</label>
-                                            </div>
-                                            <p class="form-help">Receive notifications in your browser while on the platform.</p>
-                                        </div>
-                                        
-                                        <div class="form-group">
-                                            <div class="checkbox-group">
-                                                <input type="checkbox" id="sms_notifications" name="sms_notifications" <?php echo $user['notifications']['sms_notifications'] ? 'checked' : ''; ?>>
-                                                <label for="sms_notifications">SMS Notifications</label>
-                                            </div>
-                                            <p class="form-help">Receive SMS notifications for important events.</p>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="form-actions">
-                                        <button type="submit" class="submit-btn">Save Preferences</button>
-                                    </div>
-                                </form>
-                            </div>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -435,19 +513,129 @@ foreach ($name_parts as $part) {
                 });
             }
             
-            // Security form validation
-            const securityForm = document.querySelector('form[name="action"][value="update_security"]');
-            if (securityForm) {
-                securityForm.addEventListener('submit', function(event) {
-                    const newPassword = document.getElementById('new_password').value;
-                    const confirmPassword = document.getElementById('confirm_password').value;
+            // Avatar removal
+            const removeAvatarBtn = document.getElementById('remove-avatar-btn');
+            if (removeAvatarBtn) {
+                removeAvatarBtn.addEventListener('click', function() {
+                    const avatarPreview = document.querySelector('.avatar-preview');
+                    const removeAvatarInput = document.getElementById('remove-avatar');
                     
-                    if (newPassword && newPassword !== confirmPassword) {
+                    // Update the hidden input value
+                    removeAvatarInput.value = '1';
+                    
+                    // Replace avatar image with initials placeholder
+                    const initials = '<?php echo htmlspecialchars($initials); ?>';
+                    avatarPreview.innerHTML = `<div class="avatar-placeholder">${initials}</div>`;
+                    
+                    // Hide the remove button
+                    this.style.display = 'none';
+                });
+            }
+            
+            // Form Validation
+            
+            // General form validation
+            const generalForm = document.querySelector('form input[name="action"][value="update_general"]').closest('form');
+            if (generalForm) {
+                generalForm.addEventListener('submit', function(event) {
+                    const name = document.getElementById('name').value.trim();
+                    const email = document.getElementById('email').value.trim();
+                    
+                    if (name === '') {
                         event.preventDefault();
-                        alert('Passwords do not match.');
+                        showInlineError('name', 'Name is required');
+                        return false;
+                    }
+                    
+                    if (email === '') {
+                        event.preventDefault();
+                        showInlineError('email', 'Email is required');
+                        return false;
+                    }
+                    
+                    if (!isValidEmail(email)) {
+                        event.preventDefault();
+                        showInlineError('email', 'Please enter a valid email address');
+                        return false;
                     }
                 });
             }
+            
+            // Security form validation
+            const securityForm = document.querySelector('form input[name="action"][value="update_security"]').closest('form');
+            if (securityForm) {
+                securityForm.addEventListener('submit', function(event) {
+                    const currentPassword = document.getElementById('current_password').value;
+                    const newPassword = document.getElementById('new_password').value;
+                    const confirmPassword = document.getElementById('confirm_password').value;
+                    
+                    // Only validate if attempting to change password
+                    if (newPassword || confirmPassword) {
+                        if (!currentPassword) {
+                            event.preventDefault();
+                            showInlineError('current_password', 'Current password is required');
+                            return false;
+                        }
+                        
+                        if (newPassword !== confirmPassword) {
+                            event.preventDefault();
+                            showInlineError('confirm_password', 'Passwords do not match');
+                            return false;
+                        }
+                        
+                        if (newPassword.length < 8) {
+                            event.preventDefault();
+                            showInlineError('new_password', 'Password must be at least 8 characters');
+                            return false;
+                        }
+                    }
+                });
+            }
+            
+            // Helper functions
+            function showInlineError(fieldId, message) {
+                const field = document.getElementById(fieldId);
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'field-error';
+                errorDiv.textContent = message;
+                
+                // Remove any existing error messages
+                const existingError = field.parentNode.querySelector('.field-error');
+                if (existingError) {
+                    existingError.remove();
+                }
+                
+                // Add error class to input
+                field.classList.add('input-error');
+                
+                // Insert error message after the input
+                field.parentNode.insertBefore(errorDiv, field.nextSibling);
+                
+                // Clear error when input changes
+                field.addEventListener('input', function() {
+                    const error = this.parentNode.querySelector('.field-error');
+                    if (error) {
+                        error.remove();
+                        this.classList.remove('input-error');
+                    }
+                }, { once: true });
+            }
+            
+            function isValidEmail(email) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return emailRegex.test(email);
+            }
+            
+            // Auto-hide alerts after 5 seconds
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                setTimeout(function() {
+                    alert.style.opacity = '0';
+                    setTimeout(function() {
+                        alert.style.display = 'none';
+                    }, 300);
+                }, 5000);
+            });
         });
     </script>
 </body>

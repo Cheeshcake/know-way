@@ -126,7 +126,6 @@ $success_message = isset($_GET['success']) && $_GET['success'] == 1 ? "User upda
                     <li><a href="admin.php"><span class="nav-icon dashboard-icon"></span>Dashboard</a></li>
                     <li><a href="#"><span class="nav-icon courses-icon"></span>Courses</a></li>
                     <li class="active"><a href="users.php"><span class="nav-icon users-icon"></span>Users</a></li>
-                    <li><a href="#"><span class="nav-icon stats-icon"></span>Statistics</a></li>
                     <li><a href="settings.php"><span class="nav-icon settings-icon"></span>Settings</a></li>
                 </ul>
             </nav>
@@ -150,11 +149,11 @@ $success_message = isset($_GET['success']) && $_GET['success'] == 1 ? "User upda
                 
                 <div class="header-right">
                     <div class="admin-profile">
-                        <div class="admin-avatar">
-                            <?php if (isset($user_avatar) && $user_avatar): ?>
-                                <img src="<?php echo htmlspecialchars($user_avatar); ?>" alt="Avatar">
+                    <div class="admin-avatar" style="width: 40px; height: 40px; border-radius: 50%; overflow: hidden; background-color: #e9ecef; display: flex; align-items: center; justify-content: center; margin-right: 8px; font-weight: 600; flex-shrink: 0; text-align: center;">
+                    <?php if (isset($user_avatar) && $user_avatar): ?>
+                                <img src="<?php echo htmlspecialchars($user_avatar); ?>" alt="Avatar" style="width: 40px; height: 40px; object-fit: cover; display: block; margin: 0; padding: 0;">
                             <?php else: ?>
-                                <?php echo htmlspecialchars($initials); ?>
+                                <span style="font-size: 16px;"><?php echo htmlspecialchars($initials); ?></span>
                             <?php endif; ?>
                         </div>
                         <span class="admin-name"><?= htmlspecialchars($username) ?></span>

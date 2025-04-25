@@ -225,6 +225,11 @@ button {
   color: var(--black);
 }
 
+.header-right {
+  display: flex;
+  align-items: center;
+}
+
 .menu-toggle {
   display: none;
   flex-direction: column;
@@ -240,24 +245,6 @@ button {
   height: 2px;
   background-color: var(--dark-gray);
   transition: all var(--transition-fast);
-}
-
-.admin-profile {
-  display: flex;
-  align-items: center;
-}
-
-.admin-avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background-color: var(--primary);
-  color: var(--white);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  margin-right: var(--space-sm);
 }
 
 .admin-name {

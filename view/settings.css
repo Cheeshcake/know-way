@@ -304,6 +304,17 @@ button {
   opacity: 1;
 }
 
+/* Add styling for the error alert */
+.alert-error {
+  background-color: #ffebee;
+  border-left: 4px solid #f44336;
+  color: #d32f2f;
+}
+
+.alert-error i {
+  color: #f44336;
+}
+
 /* 
    Additional settings styles - this file extends admin-styles.css 
    Contains only the unique styling needed for settings page
@@ -610,4 +621,25 @@ button {
   .main-content {
     margin-left: 0;
   }
+}
+
+/* Form validation styles */
+.field-error {
+  color: #f44336;
+  font-size: 0.85rem;
+  margin-top: 4px;
+  display: block;
+}
+
+.input-error {
+  border-color: #f44336 !important;
+  background-color: rgba(244, 67, 54, 0.05) !important;
+}
+
+/* Fix form input focus style */
+.form-group input:focus,
+.form-group textarea:focus {
+  border-color: #3f51b5;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(63, 81, 181, 0.2);
 }
