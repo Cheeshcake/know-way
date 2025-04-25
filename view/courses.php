@@ -245,7 +245,7 @@ $courses_result = $conn->query($courses_sql);
                         </a>
                     </li>
                     <li>
-                        <a href="#" class="nav-link ">
+                        <a href="my-courses.php" class="nav-link">
                             <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
                                 <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
@@ -368,7 +368,7 @@ $courses_result = $conn->query($courses_sql);
                         echo '
                         <div class="course-card">
                             <div class="course-image">
-                                <img src="uploads/' . ($course['image'] ?? 'assets/images/course-placeholder.jpg') . '" alt="' . htmlspecialchars($course['title']) . '" onerror="this.src=\'assets/images/course-placeholder.jpg\'">
+                                <img src="uploads/' . ($course['image'] ?? 'assets/placeholder-course.png') . '" alt="' . htmlspecialchars($course['title']) . '" onerror="this.src=\'assets/placeholder-course.png\'">
                             </div>
                             <div class="course-content">
                                 <h3 class="course-title">' . htmlspecialchars($course['title']) . '</h3>

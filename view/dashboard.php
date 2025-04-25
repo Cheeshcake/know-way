@@ -159,7 +159,7 @@ $user_progress = [
                         </a>
                     </li>
                     <li>
-                        <a href="#" class="nav-link">
+                        <a href="my-courses.php" class="nav-link">
                             <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
                                 <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
@@ -248,14 +248,14 @@ $user_progress = [
         <div class="page-header">
             <h1 class="greeting">Welcome back, <?php echo $username; ?>!</h1>
             <p class="subheading">Track your progress and continue learning</p>
-        </div>
+            </div>
         
         <div class="dashboard-grid">
             <!-- Progress Section -->
             <div class="card">
                 <div class="card-header">
                     <h2 class="card-title">My Progress</h2>
-                </div>
+                    </div>
                 <div class="card-body">
                     <div class="progress-stats">
                         <div class="stat-card">
@@ -272,10 +272,10 @@ $user_progress = [
                         </div>
                     </div>
                     
-                    
-                </div>
-            </div>
-            
+                        
+                        </div>
+                        </div>
+                        
             <!-- Recommended Courses Section -->
             <div class="card">
                 <div class="card-header">
@@ -316,7 +316,7 @@ $user_progress = [
             </div>
             
             
-        </div>
+                        </div>
     </main>
     
     <script>
@@ -346,4 +346,4 @@ $user_progress = [
         });
     </script>
 </body>
-</html>
+</html> 
