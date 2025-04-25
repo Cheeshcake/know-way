@@ -18,6 +18,27 @@ if (!isset($_SESSION['user_id']) || empty($_SESSION['user_id'])) {
 $user_id = $_SESSION['user_id'];
 $username = $_SESSION['username'];
 
+// Get avatar path and initials
+$user_avatar = '';
+$stmt = $conn->prepare("SELECT avatar FROM users WHERE id = ?");
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$avatar_result = $stmt->get_result();
+if ($avatar_result && $avatar_result->num_rows > 0) {
+    $user_avatar = $avatar_result->fetch_assoc()['avatar'];
+}
+$stmt->close();
+
+// Generate initials from username
+$initials = '';
+$name_parts = explode(' ', $username);
+foreach ($name_parts as $part) {
+    $initials .= substr($part, 0, 1);
+}
+if (empty($initials)) {
+    $initials = substr($username, 0, 1);
+}
+
 // Pagination setup
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $limit = 9; // Number of courses per page
@@ -271,7 +292,7 @@ $courses_result = $conn->query($courses_sql);
                 <ul class="nav-links">
                     
                     <li>
-                        <a href="#" class="nav-link">
+                        <a href="user-settings.php" class="nav-link">
                             <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <circle cx="12" cy="12" r="3"></circle>
                                 <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
@@ -285,8 +306,12 @@ $courses_result = $conn->query($courses_sql);
         
         <div class="sidebar-footer">
             <div class="user-profile">
-                <div class="user-avatar">
-                    <?php echo substr($username, 0, 1); ?>
+                <div class="user-avatar" style="width: 40px; height: 40px; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; margin-right: 8px; font-weight: 600; flex-shrink: 0; text-align: center;">
+                    <?php if (!empty($user_avatar) && file_exists($user_avatar)): ?>
+                        <img src="<?php echo htmlspecialchars($user_avatar); ?>" alt="Avatar" style="width: 40px; height: 40px; object-fit: cover; display: block; margin: 0; padding: 0;">
+                    <?php else: ?>
+                        <span style="font-size: 16px;"><?php echo htmlspecialchars($initials); ?></span>
+                    <?php endif; ?>
                 </div>
                 <div class="user-info">
                     <div class="user-name"><?php echo $username; ?></div>
