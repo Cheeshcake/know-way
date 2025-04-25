@@ -124,7 +124,7 @@ $success_message = isset($_GET['success']) && $_GET['success'] == 1 ? "User upda
             <nav class="sidebar-nav">
                 <ul>
                     <li><a href="admin.php"><span class="nav-icon dashboard-icon"></span>Dashboard</a></li>
-                    <li><a href="#"><span class="nav-icon courses-icon"></span>Courses</a></li>
+                    <li><a href="pending-courses.php"><span class="nav-icon courses-icon"></span>Pending Courses</a></li>
                     <li class="active"><a href="users.php"><span class="nav-icon users-icon"></span>Users</a></li>
                     <li><a href="settings.php"><span class="nav-icon settings-icon"></span>Settings</a></li>
                 </ul>

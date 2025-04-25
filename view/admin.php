@@ -87,7 +87,7 @@ $isLoading = false;
             <nav class="sidebar-nav">
                 <ul>
                     <li class="active"><a href="admin.php"><span class="nav-icon dashboard-icon"></span>Dashboard</a></li>
-                    <li><a href="#"><span class="nav-icon courses-icon"></span>Courses</a></li>
+                    <li><a href="pending-courses.php"><span class="nav-icon courses-icon"></span>Pending Courses</a></li>
                     <li><a href="users.php"><span class="nav-icon users-icon"></span>Users</a></li>
                     <li><a href="settings.php"><span class="nav-icon settings-icon"></span>Settings</a></li>
                 </ul>
@@ -193,7 +193,7 @@ $isLoading = false;
                                         <h4 class="course-title"><?= htmlspecialchars($row['title']) ?></h4>
                                         <p class="course-desc"><?= htmlspecialchars(substr($row['description'], 0, 100)) ?>...</p>
                                         <div class="course-actions">
-                                            <button class="edit-btn">Edit</button>
+                                        <button class="edit-btn" onclick="window.location.href='course-details.php?id=<?= $row['id'] ?>'">Preview</button>
                                             <form method="POST" action="../controller/delete-course.php" class="delete-form" onsubmit="return confirm('Are you sure you want to delete this course?');">
                                                 <input type="hidden" name="id" value="<?= $row['id'] ?>">
                                                 <button type="submit" class="delete-btn">Delete</button>

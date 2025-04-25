@@ -209,9 +209,10 @@ body::before {
 form {
   width: 100%;
   max-width: 400px;
-  margin: 0 auto;
+  /* margin: 0 auto; */
   position: relative;
   z-index: 2;
+  /* background-color: #212529; */
 }
 
 h2 {

@@ -1,9 +1,29 @@
 <?php
+// Start session if not already started
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 include '../config/db.php';
+
+// Check if user is logged in
+if (!isset($_SESSION['user_id']) || empty($_SESSION['user_id'])) {
+    header('Location: ../view/index.html');
+    exit;
+}
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $title = trim(htmlspecialchars($_POST['title']));
     $description = trim(htmlspecialchars($_POST['description']));
+    $creator_id = $_SESSION['user_id'];
+    
+    // Set default status based on user role
+    $status = 'pending';
+    
+    // If admin is creating course, automatically publish it
+    if ($_SESSION['role'] === 'admin') {
+        $status = 'published';
+    }
     
     $target_dir = "../view/uploads/";
     
@@ -37,11 +57,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
     
     // prevent SQL injection (screw you hackers)
-    $stmt = $conn->prepare("INSERT INTO courses (title, description, image, created_at) VALUES (?, ?, ?, NOW())");
-    $stmt->bind_param("sss", $title, $description, $image);
+    $stmt = $conn->prepare("INSERT INTO courses (creator_id, title, description, image, status, created_at) VALUES (?, ?, ?, ?, ?, NOW())");
+    $stmt->bind_param("issss", $creator_id, $title, $description, $image, $status);
     
     if ($stmt->execute()) {
-        header("Location: ../view/admin.php?success=Course added successfully");
+        // Redirect based on user role
+        if ($_SESSION['role'] === 'admin') {
+            header("Location: ../view/admin.php?success=Course added successfully");
+        } else {
+            header("Location: ../view/dashboard.php?success=Course submitted for approval");
+        }
         exit;
     } else {
         echo "Error: " . $stmt->error;
@@ -49,7 +74,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
     $stmt->close();
 } else {
-    header("Location: ../view/admin.php");
+    // Redirect based on user role
+    if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') {
+        header("Location: ../view/admin.php");
+    } else {
+        header("Location: ../view/dashboard.php");
+    }
     exit;
 }
 
