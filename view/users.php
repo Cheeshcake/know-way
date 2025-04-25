@@ -450,19 +450,14 @@ $success_message = isset($_GET['success']) && $_GET['success'] == 1 ? "User upda
         }
         
         .delete-btn {
-            padding: 6px 12px;
+            color: #dc3545;
             background-color: rgba(220, 53, 69, 0.1);
-            color: var(--red);
-            border-radius: var(--radius-sm);
-            font-size: 0.85rem;
-            transition: background-color var(--transition-fast);
+            border: none;
         }
-        
+
         .delete-btn:hover {
-            background-color: var(--red);
-            color: var(--white);
+            background-color: rgba(220, 53, 69, 0.2);
         }
-        
         .no-users {
             text-align: center;
             padding: 24px;

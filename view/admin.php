@@ -143,7 +143,10 @@ $isLoading = false;
                         </form>
                     </div>
                     
-                    <button class="add-course-btn" id="addCourseBtn">Add New Course</button>
+                    <a href="create-course.php" class="add-course-btn">
+                        <span class="add-icon"></span>
+                        Add New Course
+                    </a>
                 </div>
                 
                 <div class="dashboard-stats">
@@ -234,87 +237,52 @@ $isLoading = false;
         </main>
     </div>
     
-    <!-- Add Course Dialog -->
-    <div class="modal-overlay" id="addCourseModal">
-        <div class="modal">
-            <div class="modal-header">
-                <h3>Add New Course</h3>
-                <button class="modal-close" id="closeModal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <form method="POST" action="../controller/add-course.php" enctype="multipart/form-data" class="add-course-form">
-                    <div class="form-group">
-                        <label for="title">Course Title</label>
-                        <input type="text" id="title" name="title" placeholder="Enter course title" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="description">Course Description</label>
-                        <textarea id="description" name="description" placeholder="Enter course description" required></textarea>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="image">Course Image</label>
-                        <div class="file-input-wrapper">
-                            <input type="file" id="image" name="image" required>
-                            <div class="file-input-label">Choose a file</div>
-                        </div>
-                    </div>
-                    
-                    <div class="form-actions">
-                        <button type="button" class="cancel-btn" id="cancelAdd">Cancel</button>
-                        <button type="submit" class="submit-btn">Add Course</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-    
     <script>
-        // simple JavaScript for modal functionality
+        // simple JavaScript for sidebar functionality
         document.addEventListener('DOMContentLoaded', function() {
-            const addCourseBtn = document.getElementById('addCourseBtn');
-            const addCourseModal = document.getElementById('addCourseModal');
-            const closeModal = document.getElementById('closeModal');
-            const cancelAdd = document.getElementById('cancelAdd');
             const menuToggle = document.getElementById('menuToggle');
             const adminContainer = document.querySelector('.admin-container');
-            
-            addCourseBtn.addEventListener('click', function() {
-                addCourseModal.classList.add('active');
-                document.body.classList.add('modal-open');
-            });
-            
-            function closeModalFunction() {
-                addCourseModal.classList.remove('active');
-                document.body.classList.remove('modal-open');
-            }
-            
-            closeModal.addEventListener('click', closeModalFunction);
-            cancelAdd.addEventListener('click', closeModalFunction);
-            
-            addCourseModal.addEventListener('click', function(e) {
-                if (e.target === addCourseModal) {
-                    closeModalFunction();
-                }
-            });
             
             menuToggle.addEventListener('click', function() {
                 adminContainer.classList.toggle('sidebar-collapsed');
             });
-            
-            const fileInput = document.getElementById('image');
-            const fileLabel = document.querySelector('.file-input-label');
-            
-            fileInput.addEventListener('change', function() {
-                if (fileInput.files.length > 0) {
-                    fileLabel.textContent = fileInput.files[0].name;
-                } else {
-                    fileLabel.textContent = 'Choose a file';
-                }
-            });
         });
     </script>
+    
+    <style>
+        /* ... existing CSS styles ... */
+        
+        .add-course-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background-color: #4f46e5;
+            color: white;
+            padding: 10px 18px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
+        }
+        
+        .add-course-btn:hover {
+            background-color: #4338ca;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(79, 70, 229, 0.3);
+        }
+        
+        .add-icon {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+        /* ... more CSS styles ... */
+    </style>
 </body>
 </html>
 

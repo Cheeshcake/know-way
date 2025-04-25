@@ -75,25 +75,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Insert quiz
             $quiz_sql = "INSERT INTO course_quizzes (course_id, title, description, created_at) VALUES (?, ?, ?, NOW())";
             $quiz_stmt = $conn->prepare($quiz_sql);
+            if (!$quiz_stmt) {
+                throw new Exception("Error preparing quiz statement: " . $conn->error);
+            }
             $quiz_stmt->bind_param("iss", $course_id, $_POST['title'], $_POST['description']);
-            $quiz_stmt->execute();
+            $result = $quiz_stmt->execute();
+            if (!$result) {
+                throw new Exception("Error executing quiz statement: " . $quiz_stmt->error);
+            }
             
             $quiz_id = $conn->insert_id;
             
-            // Insert questions
+            // Insert questions and answers
             for ($i = 1; $i <= 5; $i++) {
                 $question_text = $_POST['question_' . $i];
-                $option_a = $_POST['q' . $i . '_option_a'];
-                $option_b = $_POST['q' . $i . '_option_b'];
-                $option_c = $_POST['q' . $i . '_option_c'];
-                $option_d = $_POST['q' . $i . '_option_d'];
+                $question_type = 'multiple_choice'; // Default type
+                
+                // Insert question
+                $question_sql = "INSERT INTO quiz_questions (quiz_id, question, type, created_at) VALUES (?, ?, ?, NOW())";
+                $question_stmt = $conn->prepare($question_sql);
+                $question_stmt->bind_param("iss", $quiz_id, $question_text, $question_type);
+                $question_stmt->execute();
+                
+                $question_id = $conn->insert_id;
+                
+                // Get the correct answer option
                 $correct_answer = $_POST['q' . $i . '_correct'];
                 
-                $question_sql = "INSERT INTO quiz_questions (quiz_id, question_text, option_a, option_b, option_c, option_d, correct_answer) 
-                                VALUES (?, ?, ?, ?, ?, ?, ?)";
-                $question_stmt = $conn->prepare($question_sql);
-                $question_stmt->bind_param("issssss", $quiz_id, $question_text, $option_a, $option_b, $option_c, $option_d, $correct_answer);
-                $question_stmt->execute();
+                // Insert answer options
+                $option_values = [
+                    'A' => $_POST['q' . $i . '_option_a'],
+                    'B' => $_POST['q' . $i . '_option_b'],
+                    'C' => $_POST['q' . $i . '_option_c'],
+                    'D' => $_POST['q' . $i . '_option_d']
+                ];
+                
+                foreach ($option_values as $option_key => $answer_text) {
+                    $is_correct = ($option_key == $correct_answer) ? 1 : 0;
+                    
+                    $answer_sql = "INSERT INTO quiz_answers (question_id, answer_text, is_correct) VALUES (?, ?, ?)";
+                    $answer_stmt = $conn->prepare($answer_sql);
+                    $answer_stmt->bind_param("isi", $question_id, $answer_text, $is_correct);
+                    $answer_stmt->execute();
+                }
             }
             
             $conn->commit();
@@ -116,6 +140,9 @@ if (empty($success_message)) {
 if (empty($error_message)) {
     $error_message = $_GET['error'] ?? '';
 }
+
+// Check if there are existing quizzes for this course
+$quiz_sql = "SELECT id, title FROM course_quizzes WHERE course_id = ?";
 ?>
 <!DOCTYPE html>
 <html lang="en">
