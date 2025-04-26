@@ -209,9 +209,10 @@ body::before {
 form {
   width: 100%;
   max-width: 400px;
-  margin: 0 auto;
+  /* margin: 0 auto; */
   position: relative;
   z-index: 2;
+  /* background-color: #212529; */
 }
 
 h2 {
@@ -239,6 +240,9 @@ h2 {
   border-radius: 8px;
   padding: 0 12px;
   box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .input-group:nth-child(1) {
@@ -297,7 +301,7 @@ h2 {
 }
 
 .input-group input:focus + label,
-.input-group input:valid + label {
+.input-group input:not(:placeholder-shown) + label {
   top: -12px;
   left: 12px;
   font-size: 0.8rem;
@@ -308,6 +312,45 @@ h2 {
 .input-group input:focus ~ .line::after,
 .input-group input:valid ~ .line::after {
   width: 100%;
+}
+
+/* Password visibility toggle */
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  cursor: pointer;
+  color: var(--gray);
+  font-size: 1.2rem;
+  transition: color var(--transition-fast);
+  background: none;
+  border: none;
+  outline: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  padding: 0;
+  margin: 0;
+  width: 24px;
+  height: 24px;
+}
+
+.password-toggle:hover {
+  color: var(--primary);
+}
+
+.password-toggle svg {
+  width: 20px;
+  height: 20px;
+}
+
+.input-group.password-input {
+  position: relative;
+}
+
+.input-group.password-input input {
+  padding-right: 40px;
 }
 
 /* Remember & Forgot */
@@ -431,6 +474,11 @@ h2 {
 
 .btn:hover::before {
   left: 100%;
+}
+
+.btn a {
+  color: var(--white) !important;
+  text-decoration: none !important;
 }
 
 /* Divider */
@@ -606,4 +654,153 @@ h2 {
   .form-subtitle {
     font-size: 0.9rem;
   }
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(5px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+  opacity: 0;
+  visibility: hidden;
+  transition: var(--transition-normal);
+  pointer-events: none;
+}
+
+.modal-overlay.active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: all;
+}
+
+.modal-container {
+  background: var(--white);
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+  width: 90%;
+  max-width: 500px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  transform: translateY(20px);
+  transition: var(--transition-normal);
+  overflow: hidden;
+  position: relative;
+}
+
+body:has(.modal-overlay.active) {
+  overflow: hidden;
+}
+
+.modal-overlay.active .modal-container {
+  transform: translateY(0);
+}
+
+.modal-header {
+  padding: 20px;
+  border-bottom: 1px solid var(--light-gray);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h3 {
+  color: var(--black);
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 1.8rem;
+  cursor: pointer;
+  color: var(--gray);
+  transition: var(--transition-fast);
+  line-height: 1;
+  padding: 0 8px;
+}
+
+.modal-close:hover {
+  color: var(--accent);
+}
+
+.modal-content {
+  padding: 20px;
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+.modal-content h4 {
+  color: var(--primary);
+  margin: 20px 0 10px;
+  font-size: 1.1rem;
+}
+
+.modal-content h4:first-child {
+  margin-top: 0;
+}
+
+.modal-content p {
+  color: var(--dark-gray);
+  line-height: 1.6;
+  margin-bottom: 15px;
+  font-size: 0.95rem;
+}
+
+.modal-footer {
+  padding: 15px 20px;
+  border-top: 1px solid var(--light-gray);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.modal-agree {
+  width: auto;
+  padding: 10px 20px;
+  background: linear-gradient(to right, var(--primary), var(--accent));
+  color: var(--white);
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-fast);
+}
+
+.modal-agree:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--light-gray);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--gray);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+/* Focus styles */
+:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
 }
