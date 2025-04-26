@@ -7,6 +7,9 @@ if (session_status() === PHP_SESSION_NONE) {
 // Include database connection
 include '../config/db.php';
 
+// Include fuzzy search functions
+include '../indexation/fuzzy_search.php';
+
 // Check if user is logged in
 if (!isset($_SESSION['user_id']) || empty($_SESSION['user_id'])) {
     // Redirect to login page
@@ -33,10 +36,10 @@ $stmt->close();
 $initials = '';
 $name_parts = explode(' ', $username);
 foreach ($name_parts as $part) {
-    $initials .= strtoupper(substr($part, 0, 1));
+    $initials .= substr($part, 0, 1);
 }
 if (empty($initials)) {
-    $initials = strtoupper(substr($username, 0, 1));
+    $initials = substr($username, 0, 1);
 }
 
 // Pagination setup
@@ -59,15 +62,24 @@ if ($sort === 'oldest') {
 // Search functionality
 $search = isset($_GET['search']) ? $_GET['search'] : '';
 $search_condition = '';
-$count_search_condition = '';
+$using_fuzzy_search = false;
+
 if (!empty($search)) {
-    $search = $conn->real_escape_string($search); // Protect against SQL injection
-    $search_condition = "AND (c.title LIKE '%$search%' OR c.description LIKE '%$search%')";
-    $count_search_condition = "AND (title LIKE '%$search%' OR description LIKE '%$search%')";
+    // Try fuzzy search first
+    $fuzzy_results = fuzzy_search_courses($search, $conn, 50);
+    
+    if ($fuzzy_results !== null) {
+        // Use fuzzy search results
+        $search_condition = create_fuzzy_search_condition($fuzzy_results);
+        $using_fuzzy_search = true;
+    } else {
+        // Fall back to basic search if fuzzy search fails
+        $search_condition = "AND (title LIKE '%$search%' OR description LIKE '%$search%')";
+    }
 }
 
 // Get total number of published courses for pagination
-$count_sql = "SELECT COUNT(*) as total FROM courses WHERE status = 'published' $count_search_condition";
+$count_sql = "SELECT COUNT(*) as total FROM courses c WHERE status = 'published' $search_condition";
 $count_result = $conn->query($count_sql);
 $total_courses = $count_result->fetch_assoc()['total'];
 $total_pages = ceil($total_courses / $limit);
@@ -83,8 +95,6 @@ $courses_sql = "SELECT c.*, COUNT(cq.id) as quizzes_count
 $courses_result = $conn->query($courses_sql);
 ?>
 
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -95,11 +105,6 @@ $courses_result = $conn->query($courses_sql);
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
     <style>
-        .course-title {
-            max-width: 400px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
         .filter-container {
             display: flex;
             justify-content: space-between;
@@ -369,6 +374,16 @@ $courses_result = $conn->query($courses_sql);
                     </select>
                 </div>
             </form>
+            
+            <?php if (!empty($search)): ?>
+            <div class="search-info" style="margin-bottom: 20px; font-size: 0.9rem; color: var(--gray);">
+                <?php if ($using_fuzzy_search): ?>
+                    <p>Showing fuzzy search results for "<?php echo htmlspecialchars($search); ?>"</p>
+                <?php else: ?>
+                    <p>Showing exact search results for "<?php echo htmlspecialchars($search); ?>"</p>
+                <?php endif; ?>
+            </div>
+            <?php endif; ?>
             
             <!-- Courses Grid -->
             <div class="courses-grid">
