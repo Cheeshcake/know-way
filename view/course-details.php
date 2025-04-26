@@ -202,6 +202,9 @@ $error_message = $_GET['error'] ?? '';
             margin-bottom: 16px;
             color: #111827;
             line-height: 1.2;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 600px
         }
 
         .course-meta {

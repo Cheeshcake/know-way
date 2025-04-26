@@ -136,6 +136,11 @@ foreach ($status_types as $type) {
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
     <style>
+        .course-title {
+            max-width: 400px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
         .filter-container {
             display: flex;
             justify-content: space-between;
