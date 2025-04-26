@@ -260,7 +260,7 @@ $user_progress = [
                     <div class="progress-stats">
                         <div class="stat-card">
                             <div class="stat-value"><?php echo $user_progress['courses_enrolled']; ?></div>
-                            <div class="stat-label">Courses Enrolled</div>
+                            <div class="stat-label">Courses</div>
                         </div>
                         <div class="stat-card">
                             <div class="stat-value"><?php echo $user_progress['quiz_attempts']; ?></div>
