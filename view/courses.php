@@ -33,10 +33,10 @@ $stmt->close();
 $initials = '';
 $name_parts = explode(' ', $username);
 foreach ($name_parts as $part) {
-    $initials .= substr($part, 0, 1);
+    $initials .= strtoupper(substr($part, 0, 1));
 }
 if (empty($initials)) {
-    $initials = substr($username, 0, 1);
+    $initials = strtoupper(substr($username, 0, 1));
 }
 
 // Pagination setup
@@ -59,12 +59,15 @@ if ($sort === 'oldest') {
 // Search functionality
 $search = isset($_GET['search']) ? $_GET['search'] : '';
 $search_condition = '';
+$count_search_condition = '';
 if (!empty($search)) {
-    $search_condition = "AND (title LIKE '%$search%' OR description LIKE '%$search%')";
+    $search = $conn->real_escape_string($search); // Protect against SQL injection
+    $search_condition = "AND (c.title LIKE '%$search%' OR c.description LIKE '%$search%')";
+    $count_search_condition = "AND (title LIKE '%$search%' OR description LIKE '%$search%')";
 }
 
 // Get total number of published courses for pagination
-$count_sql = "SELECT COUNT(*) as total FROM courses WHERE status = 'published' $search_condition";
+$count_sql = "SELECT COUNT(*) as total FROM courses WHERE status = 'published' $count_search_condition";
 $count_result = $conn->query($count_sql);
 $total_courses = $count_result->fetch_assoc()['total'];
 $total_pages = ceil($total_courses / $limit);
@@ -79,6 +82,8 @@ $courses_sql = "SELECT c.*, COUNT(cq.id) as quizzes_count
                 LIMIT $limit OFFSET $offset";
 $courses_result = $conn->query($courses_sql);
 ?>
+
+
 
 <!DOCTYPE html>
 <html lang="en">

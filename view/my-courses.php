@@ -41,34 +41,42 @@ if (empty($initials)) {
 
 // Filter by status
 $status_filter = isset($_GET['status']) ? $_GET['status'] : 'all';
-$status_condition = '';
-if ($status_filter !== 'all') {
-    $status_condition = "AND status = '$status_filter'";
-}
 
 // Search functionality
 $search = isset($_GET['search']) ? $_GET['search'] : '';
-$search_condition = '';
-if (!empty($search)) {
-    $search_condition = "AND (title LIKE '%$search%' OR description LIKE '%$search%')";
-}
 
 // Sorting options
 $sort = isset($_GET['sort']) ? $_GET['sort'] : 'newest';
-$order_by = "created_at DESC"; // Default sorting
+$order_by = "c.created_at DESC"; // Default sorting
 
 if ($sort === 'oldest') {
-    $order_by = "created_at ASC";
+    $order_by = "c.created_at ASC";
 } elseif ($sort === 'title_asc') {
-    $order_by = "title ASC";
+    $order_by = "c.title ASC";
 } elseif ($sort === 'title_desc') {
-    $order_by = "title DESC";
+    $order_by = "c.title DESC";
 }
 
 // Get total number of user's courses
-$count_sql = "SELECT COUNT(*) as total FROM courses WHERE creator_id = ? $status_condition $search_condition";
+$count_sql = "SELECT COUNT(*) as total FROM courses c WHERE c.creator_id = ?";
+$count_params = ["i", $user_id];
+
+if ($status_filter !== 'all') {
+    $count_sql .= " AND c.status = ?";
+    $count_params[0] .= "s";
+    $count_params[] = $status_filter;
+}
+
+if (!empty($search)) {
+    $count_sql .= " AND (c.title LIKE ? OR c.description LIKE ?)";
+    $count_params[0] .= "ss";
+    $search_param = "%$search%";
+    $count_params[] = $search_param;
+    $count_params[] = $search_param;
+}
+
 $stmt = $conn->prepare($count_sql);
-$stmt->bind_param("i", $user_id);
+$stmt->bind_param(...$count_params);
 $stmt->execute();
 $total_courses = $stmt->get_result()->fetch_assoc()['total'];
 $stmt->close();
@@ -77,11 +85,27 @@ $stmt->close();
 $courses_sql = "SELECT c.*, COUNT(cq.id) as quizzes_count 
                 FROM courses c 
                 LEFT JOIN course_quizzes cq ON c.id = cq.course_id 
-                WHERE c.creator_id = ? $status_condition $search_condition 
-                GROUP BY c.id 
-                ORDER BY $order_by";
+                WHERE c.creator_id = ?";
+$courses_params = ["i", $user_id];
+
+if ($status_filter !== 'all') {
+    $courses_sql .= " AND c.status = ?";
+    $courses_params[0] .= "s";
+    $courses_params[] = $status_filter;
+}
+
+if (!empty($search)) {
+    $courses_sql .= " AND (c.title LIKE ? OR c.description LIKE ?)";
+    $courses_params[0] .= "ss";
+    $search_param = "%$search%";
+    $courses_params[] = $search_param;
+    $courses_params[] = $search_param;
+}
+
+$courses_sql .= " GROUP BY c.id ORDER BY $order_by";
+
 $stmt = $conn->prepare($courses_sql);
-$stmt->bind_param("i", $user_id);
+$stmt->bind_param(...$courses_params);
 $stmt->execute();
 $courses_result = $stmt->get_result();
 $stmt->close();
@@ -99,6 +123,8 @@ foreach ($status_types as $type) {
     $stmt->close();
 }
 ?>
+
+
 
 <!DOCTYPE html>
 <html lang="en">
